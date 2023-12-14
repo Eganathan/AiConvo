@@ -40,7 +40,7 @@ class SummarizeViewModel(
         }
 
 
-        val prompt = "$inputText in max 120 characters."
+        val prompt = "$inputText"
 
         viewModelScope.launch {
             try {
@@ -63,6 +63,8 @@ class SummarizeViewModel(
             } catch (e: Exception) {
                 _covUiData.update {
                     it.minus(aiPreConv)
+                }
+                _covUiData.update {
                     it.plus(
                         Conv(
                             id = aiPreConv.id,
