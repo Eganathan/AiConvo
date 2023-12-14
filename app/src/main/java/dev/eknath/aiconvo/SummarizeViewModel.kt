@@ -1,36 +1,90 @@
 package dev.eknath.aiconvo
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.security.CodeSource
 
 class SummarizeViewModel(
     private val generativeModel: GenerativeModel
 ) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<SummarizeUiState> =
-        MutableStateFlow(SummarizeUiState.Initial)
-    val uiState: StateFlow<SummarizeUiState> =
-        _uiState.asStateFlow()
+    //conversations
+    private val _covUiData: MutableStateFlow<List<Conv>> = MutableStateFlow(emptyList())
+    val covUiData: StateFlow<List<Conv>> = _covUiData.asStateFlow()
+
 
     fun summarize(inputText: String) {
-        _uiState.value = SummarizeUiState.Loading
+        val inputConv = Conv(
+            owner = Owner.USER,
+            value = inputText,
+            state = SummarizeUiState.Success("")
+        )
+        val aiPreConv = Conv(
+            owner = Owner.AI,
+            value = "",
+            state = SummarizeUiState.Loading
+        )
 
-        val prompt = "Summarize the following text for me: $inputText"
+        _covUiData.update {
+            it.plus(inputConv)
+        }
+        _covUiData.update {
+            it.plus(aiPreConv)
+        }
+
+
+        val prompt = "$inputText in max 120 characters."
 
         viewModelScope.launch {
             try {
                 val response = generativeModel.generateContent(prompt)
                 response.text?.let { outputContent ->
-                    _uiState.value = SummarizeUiState.Success(outputContent)
+                    _covUiData.update {
+                        it.dropLast(1)
+                    }
+                    _covUiData.update {
+                        it.plus(
+                            Conv(
+                                id = aiPreConv.id,
+                                owner = aiPreConv.owner,
+                                value = outputContent,
+                                state = SummarizeUiState.Success("")
+                            )
+                        )
+                    }
                 }
             } catch (e: Exception) {
-                _uiState.value = SummarizeUiState.Error(e.localizedMessage ?: "")
+                _covUiData.update {
+                    it.minus(aiPreConv)
+                    it.plus(
+                        Conv(
+                            id = aiPreConv.id,
+                            owner = aiPreConv.owner,
+                            value = "error",
+                            state = SummarizeUiState.Error(e.localizedMessage ?: "Some Error!")
+                        )
+                    )
+                }
             }
         }
     }
+
+}
+
+class Conv(
+    val id: Long = System.currentTimeMillis(),
+    val owner: Owner,
+    val value: String,
+    val state: SummarizeUiState
+)
+
+enum class Owner {
+    AI, USER
 }

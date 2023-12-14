@@ -3,15 +3,30 @@ package dev.eknath.aiconvo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +43,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.BuildCompat
@@ -46,12 +64,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    val generativeModel = GenerativeModel(
-                        modelName = "gemini-pro",
-                        apiKey = BuildConfig.apiKey
-                    )
+                    val generativeModel =
+                        GenerativeModel(modelName = "gemini-pro", apiKey = BuildConfig.apiKey)
                     val viewModel = SummarizeViewModel(generativeModel)
-                    SummarizeRoute(viewModel)
+
+                    ConversationScreen(viewModel)
                 }
             }
         }
@@ -59,93 +76,95 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-internal fun SummarizeRoute(
+internal fun ConversationScreen(
     summarizeViewModel: SummarizeViewModel = viewModel()
 ) {
-    val summarizeUiState by summarizeViewModel.uiState.collectAsState()
+    val summarizeUiState by summarizeViewModel.covUiData.collectAsState()
+    var prompt by remember { mutableStateOf(TextFieldValue()) }
 
-    SummarizeScreen(summarizeUiState, onSummarizeClicked = { inputText ->
-        summarizeViewModel.summarize(inputText)
-    })
-}
+    Box(modifier = Modifier.fillMaxSize()) {
 
-@Composable
-fun SummarizeScreen(
-    uiState: SummarizeUiState = SummarizeUiState.Initial,
-    onSummarizeClicked: (String) -> Unit = {}
-) {
-    var prompt by remember { mutableStateOf("") }
-    Column(
-        modifier = Modifier
-            .padding(all = 8.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Row {
-            TextField(
-                value = prompt,
-                label = { Text(stringResource(R.string.summarize_label)) },
-                placeholder = { Text(stringResource(R.string.summarize_hint)) },
-                onValueChange = { prompt = it },
-                modifier = Modifier
-                    .weight(8f)
-            )
-            TextButton(
-                onClick = {
-                    if (prompt.isNotBlank()) {
-                        onSummarizeClicked(prompt)
-                    }
-                },
-
-                modifier = Modifier
-                    .weight(2f)
-                    .padding(all = 4.dp)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Text(stringResource(R.string.action_go))
+        LazyColumn(Modifier.fillMaxSize()) {
+            items(items = summarizeUiState) {
+                ConversationUI(it)
             }
         }
-        when (uiState) {
-            SummarizeUiState.Initial -> {
-                // Nothing is shown
-            }
 
-            SummarizeUiState.Loading -> {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(all = 8.dp)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            is SummarizeUiState.Success -> {
-                Row(modifier = Modifier.padding(all = 8.dp)) {
-                    Icon(
-                        Icons.Outlined.Person,
-                        contentDescription = "Person Icon"
-                    )
-                    Text(
-                        text = uiState.outputText,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                }
-            }
-
-            is SummarizeUiState.Error -> {
-                Text(
-                    text = uiState.errorMessage,
-                    color = Color.Red,
-                    modifier = Modifier.padding(all = 8.dp)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxSize()
+                .padding(bottom = 20.dp)
+                .imePadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .defaultMinSize(minHeight = 100.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 5.dp, vertical = 10.dp)
+            ) {
+                TextField(
+                    enabled = summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading,
+                    value = prompt,
+                    onValueChange = { prompt = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        autoCorrect = true
+                    ),
+                    keyboardActions = KeyboardActions(onDone = {
+                        if (prompt.text.isNotEmpty() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading) {
+                            summarizeViewModel::summarize.invoke(prompt.text)
+                            prompt = TextFieldValue()
+                        }
+                    })
                 )
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .imePadding(),
+                    shape = RoundedCornerShape(5.dp),
+                    enabled = (prompt.text.isNotEmpty() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading),
+                    onClick = {
+                        summarizeViewModel::summarize.invoke(prompt.text)
+                        prompt = TextFieldValue()
+
+                    }
+                ) {
+                    Text(text = "Send")
+                }
             }
         }
     }
+
 }
 
 @Composable
-@Preview(showSystemUi = true)
-fun SummarizeScreenPreview() {
-    SummarizeScreen()
+fun ConversationUI(input: Conv) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = if (input.owner == Owner.AI) Arrangement.Start else Arrangement.End
+    ) {
+        if (input.state is SummarizeUiState.Error) {
+            Icon(
+                imageVector = Icons.Rounded.Warning,
+                contentDescription = "",
+                tint = Color.Red
+            )
+        } else if (input.state is SummarizeUiState.Loading) {
+            Text(text = "Loading...")
+        } else if (input.state is SummarizeUiState.Success) {
+            Card(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(5.dp)
+                    .padding(top = 10.dp),
+                colors =
+                CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+            ) {
+                Text(text = input.value)
+            }
+        }
+    }
 }
