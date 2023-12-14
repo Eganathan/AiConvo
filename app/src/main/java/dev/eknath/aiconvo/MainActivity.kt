@@ -147,7 +147,7 @@ internal fun ConversationScreen(
 ) {
     val summarizeUiState by summarizeViewModel.covUiData.collectAsState()
     var prompt by remember { mutableStateOf(TextFieldValue()) }
-    val isNetWorkAvailable = NetworkStateProvider()
+    val isNetWorkAvailable = networkStateProvider()
 
     if (isNetWorkAvailable.value == NetworkState.Disconnected)
         NetworkErrorDialog()
