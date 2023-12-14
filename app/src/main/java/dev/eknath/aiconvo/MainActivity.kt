@@ -84,6 +84,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.BuildCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.GenerationConfig
+import com.google.ai.client.generativeai.type.HarmCategory
+import com.google.ai.client.generativeai.type.SafetySetting
 import dev.eknath.aiconvo.ui.theme.AIConvoTheme
 import kotlinx.coroutines.delay
 
@@ -98,8 +101,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    val generativeModel =
-                        GenerativeModel(modelName = "gemini-pro", apiKey = BuildConfig.apiKey)
+                    val generativeModel = GenerativeModel(modelName = "gemini-pro", apiKey = BuildConfig.apiKey)
                     val viewModel = SummarizeViewModel(generativeModel)
 
                     Scaffold(
