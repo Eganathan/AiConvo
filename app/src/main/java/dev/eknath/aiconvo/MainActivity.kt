@@ -1,6 +1,10 @@
 package dev.eknath.aiconvo
 
 import Loading
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,6 +43,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material.icons.rounded.Warning
@@ -69,10 +74,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -81,6 +88,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.BuildCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.ai.client.generativeai.GenerativeModel
@@ -88,7 +97,6 @@ import com.google.ai.client.generativeai.type.GenerationConfig
 import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import dev.eknath.aiconvo.ui.theme.AIConvoTheme
-import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -101,7 +109,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    val generativeModel = GenerativeModel(modelName = "gemini-pro", apiKey = BuildConfig.apiKey)
+                    val generativeModel =
+                        GenerativeModel(modelName = "gemini-pro", apiKey = BuildConfig.apiKey)
                     val viewModel = SummarizeViewModel(generativeModel)
 
                     Scaffold(
@@ -138,6 +147,10 @@ internal fun ConversationScreen(
 ) {
     val summarizeUiState by summarizeViewModel.covUiData.collectAsState()
     var prompt by remember { mutableStateOf(TextFieldValue()) }
+    val isNetWorkAvailable = NetworkStateProvider()
+
+    if (isNetWorkAvailable.value == NetworkState.Disconnected)
+        NetworkErrorDialog()
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (summarizeUiState.isNotEmpty()) {
@@ -205,7 +218,12 @@ internal fun ConversationScreen(
                                     prompt = TextFieldValue("")
 
                                 }
-                            ) { Icon(imageVector = Icons.Rounded.Send, contentDescription = "") }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Send,
+                                    contentDescription = ""
+                                )
+                            }
                         }
                     }
                 )
@@ -254,6 +272,32 @@ fun ConversationUI(input: Conv) {
                         .padding(5.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun NetworkErrorDialog() {
+    Dialog(
+        onDismissRequest = {},
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(0.9f)
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.background),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Warning,
+                contentDescription = "",
+                tint = Color.Red,
+                modifier = Modifier.size(50.dp)
+            )
+            Text(text = "Network Issue!", style = MaterialTheme.typography.headlineSmall)
+            Loading(visibility = true)
         }
     }
 }
