@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,22 +26,33 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
 @Composable
-fun BubbleLoading(visibility: Boolean) {
+fun BubbleLoading(visibility: Boolean, centerAlign: Boolean = false) { //todo refactor
     AnimatedVisibility(visible = visibility) {
         val maxProgress = 2
         val animationDuration = 150
         var index by remember { mutableIntStateOf(0) }
 
-        Row(
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(start = 5.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            repeat(maxProgress + 1) {
-                Spacer(modifier = Modifier.width(3.dp))
-                ProgressIndicator(isActive = index == it)
+        if (centerAlign) {
+            Card(modifier = Modifier.wrapContentSize()) {
+                Row {
+                    repeat(maxProgress + 1) {
+                        Spacer(modifier = Modifier.width(3.dp))
+                        ProgressIndicator(isActive = index == it)
+                    }
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(start = 5.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                repeat(maxProgress + 1) {
+                    Spacer(modifier = Modifier.width(3.dp))
+                    ProgressIndicator(isActive = index == it)
+                }
             }
         }
 
