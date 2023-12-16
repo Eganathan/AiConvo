@@ -25,7 +25,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,27 +44,27 @@ import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 @Composable
 internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
 
-    val summarizeUiState by summarizeViewModel.covUiData.collectAsState()
+    val chatContent by summarizeViewModel.covUiData.collectAsState()
     var promt by remember { mutableStateOf(TextFieldValue()) }
-
     val isNetWorkAvailable = networkStateProvider()
     val listState = rememberLazyListState()
-    val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
 
 
     if (isNetWorkAvailable.value == NetworkState.Disconnected)
         NetworkErrorDialog()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (summarizeUiState.isNotEmpty()) {
+        if (chatContent.isNotEmpty()) {
             LazyColumn(
-                Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
+                state = listState,
                 verticalArrangement = Arrangement.Bottom
             ) {
-                items(items = summarizeUiState.sortedBy { it.id }) {
+                items(items = chatContent.sortedBy { it.id }) {
                     ConversationContentUI(it)
                 }
                 item { Spacer(modifier = Modifier.height(60.dp)) }
+
             }
         } else {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -96,7 +95,7 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
                     .padding(horizontal = 5.dp, vertical = 2.dp)
             ) {
                 TextField(
-                    enabled = summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading,
+                    enabled = chatContent.lastOrNull()?.state != SummarizeUiState.Loading,
                     value = promt,
                     onValueChange = { promt = it },
                     modifier = Modifier.fillMaxWidth(),
@@ -106,7 +105,7 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
                         autoCorrect = true
                     ),
                     keyboardActions = KeyboardActions(onDone = {
-                        if (promt.text.isNotBlank() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading) {
+                        if (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != SummarizeUiState.Loading) {
                             summarizeViewModel::generateContent.invoke(promt.text)
                             promt = TextFieldValue()
                         }
@@ -119,7 +118,7 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
                                     .wrapContentSize()
                                     .padding(end = 5.dp),
                                 shape = RoundedCornerShape(5.dp),
-                                enabled = (promt.text.isNotBlank() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading),
+                                enabled = (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != SummarizeUiState.Loading),
                                 onClick = {
                                     summarizeViewModel::generateContent.invoke(promt.text)
                                     promt = TextFieldValue("")
@@ -136,10 +135,9 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
                 )
             }
         }
-    }
 
-    //to force scroll when now item is added
-    LaunchedEffect(key1 = itemCount) {
-        listState.scrollToItem(itemCount)
+        LaunchedEffect(key1 = chatContent) {
+            listState.scrollToItem((chatContent.size))
+        }
     }
 }
