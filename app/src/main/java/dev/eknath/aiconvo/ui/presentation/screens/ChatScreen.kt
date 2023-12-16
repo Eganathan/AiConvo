@@ -44,9 +44,7 @@ import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
 import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 
 @Composable
-internal fun ChatScreen(
-    summarizeViewModel: SummarizeViewModel = viewModel()
-) {
+internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
 
     val summarizeUiState by summarizeViewModel.covUiData.collectAsState()
     var prompt by remember { mutableStateOf(TextFieldValue()) }
