@@ -35,16 +35,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.eknath.aiconvo.ConvoViewModel
 import dev.eknath.aiconvo.NetworkState
 import dev.eknath.aiconvo.SummarizeUiState
-import dev.eknath.aiconvo.SummarizeViewModel
 import dev.eknath.aiconvo.networkStateProvider
 import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
 import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 
 @Composable
-internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
+internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
 
     val summarizeUiState by summarizeViewModel.covUiData.collectAsState()
     var promt by remember { mutableStateOf(TextFieldValue()) }
