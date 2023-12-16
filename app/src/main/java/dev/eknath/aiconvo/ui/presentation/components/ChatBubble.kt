@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -38,30 +39,30 @@ fun ConversationBubble(
     sender: Boolean
 ) {
     val content = LocalContext.current
-    val cardShape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
+    val cardShape =
+        RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
 
     Column {
         if (!sender)
             BotHeaderContent(onShare = { content::shareNote.invoke("", message) })
-
-            Card(
+        Card(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(5.dp)
+                .then(if (sender) Modifier.padding(start = 20.dp) else Modifier.padding(end = 20.dp)),
+            colors =
+            CardDefaults.cardColors(containerColor = if (sender) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer),
+            shape = if (sender) cardShape.copy(bottomEnd = CornerSize(0.dp)) else cardShape.copy(
+                topStart = CornerSize(0.dp)
+            )
+        ) {
+            Text(
+                text = message,
                 modifier = Modifier
-                    .wrapContentSize()
-                    .padding(top = 5.dp)
-                    .then(if (sender) Modifier.padding(start = 20.dp) else Modifier.padding(end = 20.dp)),
-                colors =
-                CardDefaults.cardColors(containerColor = if (sender) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer),
-                shape = if (sender) cardShape.copy(bottomEnd = CornerSize(0.dp)) else cardShape.copy(
-                    topStart = CornerSize(0.dp)
-                )
-            ) {
-                Text(
-                    text = message,
-                    modifier = Modifier
-                        .defaultMinSize(minWidth = 50.dp)
-                        .padding(5.dp)
-                )
-            }
+                    .defaultMinSize(minWidth = 50.dp)
+                    .padding(5.dp)
+            )
+        }
     }
 }
 
@@ -91,7 +92,12 @@ fun ConversationContentUI(input: Conv) {
 
 @Composable
 private fun BotHeaderContent(onShare: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .padding(start = 5.dp)
+            .offset(y = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_bot),
             contentDescription = "",

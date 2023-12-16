@@ -47,7 +47,7 @@ import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
 
     val summarizeUiState by summarizeViewModel.covUiData.collectAsState()
-    var prompt by remember { mutableStateOf(TextFieldValue()) }
+    var promt by remember { mutableStateOf(TextFieldValue()) }
 
     val isNetWorkAvailable = networkStateProvider()
     val listState = rememberLazyListState()
@@ -58,8 +58,12 @@ internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
         NetworkErrorDialog()
 
     Box(modifier = Modifier.fillMaxSize()) {
+
         if (summarizeUiState.isNotEmpty()) {
-            LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom) {
+            LazyColumn(
+                Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Bottom
+            ) {
                 items(items = summarizeUiState.sortedBy { it.id }) {
                     ConversationContentUI(it)
                 }
@@ -95,8 +99,8 @@ internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
             ) {
                 TextField(
                     enabled = summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading,
-                    value = prompt,
-                    onValueChange = { prompt = it },
+                    value = promt,
+                    onValueChange = { promt = it },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3,
                     keyboardOptions = KeyboardOptions(
@@ -104,9 +108,9 @@ internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
                         autoCorrect = true
                     ),
                     keyboardActions = KeyboardActions(onDone = {
-                        if (prompt.text.isNotEmpty() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading) {
-                            summarizeViewModel::summarize.invoke(prompt.text)
-                            prompt = TextFieldValue()
+                        if (promt.text.isNotEmpty() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading) {
+                            summarizeViewModel::summarize.invoke(promt.text)
+                            promt = TextFieldValue()
                         }
                     }),
                     trailingIcon = {
@@ -117,10 +121,10 @@ internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
                                     .wrapContentSize()
                                     .padding(end = 5.dp),
                                 shape = RoundedCornerShape(5.dp),
-                                enabled = (prompt.text.isNotEmpty() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading),
+                                enabled = (promt.text.isNotEmpty() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading),
                                 onClick = {
-                                    summarizeViewModel::summarize.invoke(prompt.text)
-                                    prompt = TextFieldValue("")
+                                    summarizeViewModel::summarize.invoke(promt.text)
+                                    promt = TextFieldValue("")
 
                                 }
                             ) {
