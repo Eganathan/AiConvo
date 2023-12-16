@@ -58,7 +58,6 @@ internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
         NetworkErrorDialog()
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         if (summarizeUiState.isNotEmpty()) {
             LazyColumn(
                 Modifier.fillMaxSize(),
@@ -76,7 +75,7 @@ internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = "Hi! Do you have any questions fo me?")
-                    Button(onClick = { summarizeViewModel.summarize("Hello!") }) {
+                    Button(onClick = { summarizeViewModel.generateContent("Hello!") }) {
                         Text(text = "or Just Hello!")
                     }
 
@@ -108,8 +107,8 @@ internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
                         autoCorrect = true
                     ),
                     keyboardActions = KeyboardActions(onDone = {
-                        if (promt.text.isNotEmpty() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading) {
-                            summarizeViewModel::summarize.invoke(promt.text)
+                        if (promt.text.isNotBlank() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading) {
+                            summarizeViewModel::generateContent.invoke(promt.text)
                             promt = TextFieldValue()
                         }
                     }),
@@ -121,9 +120,9 @@ internal fun ChatScreen(summarizeViewModel: SummarizeViewModel = viewModel()) {
                                     .wrapContentSize()
                                     .padding(end = 5.dp),
                                 shape = RoundedCornerShape(5.dp),
-                                enabled = (promt.text.isNotEmpty() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading),
+                                enabled = (promt.text.isNotBlank() && summarizeUiState.lastOrNull()?.state != SummarizeUiState.Loading),
                                 onClick = {
-                                    summarizeViewModel::summarize.invoke(promt.text)
+                                    summarizeViewModel::generateContent.invoke(promt.text)
                                     promt = TextFieldValue("")
 
                                 }
