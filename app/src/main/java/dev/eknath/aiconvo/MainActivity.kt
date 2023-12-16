@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -39,7 +41,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -85,8 +89,8 @@ class MainActivity : ComponentActivity() {
                                         Row {
                                             Text(
                                                 text = "AIConvo_",
-                                                fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.headlineMedium
+                                                fontWeight = FontWeight.SemiBold,
+                                                style = MaterialTheme.typography.headlineSmall
                                             )
                                         }
                                     },
@@ -137,13 +141,30 @@ fun SettingSheetComponent(viewmodel: ConvoViewModel) {
 
 @Composable
 fun DrawerContent() {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-
-        Column {
-            Text(text = "AIConvo")
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                Image(
+                    painter = painterResource(id = R.drawable.app_icon),
+                    contentDescription = "",
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier
+                        .size(200.dp)
+                        .clickable { openUrl(context, "https:eknath.dev") }
+                )
+                Text(
+                    text = "Your AI Companion :)",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset(y = (-15).dp),
+                )
+            }
             Divider()
         }
 
@@ -184,7 +205,9 @@ fun CreditComponent() {
             text = "eknath.dev",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.fillMaxWidth().clickable {openUrl(context,"https:eknath.dev") }
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { openUrl(context, "https:eknath.dev") }
         )
     }
 }
