@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import com.google.ai.client.generativeai.GenerativeModel
 import dev.eknath.aiconvo.ui.presentation.screens.ChatScreen
 import dev.eknath.aiconvo.ui.theme.AIConvoTheme
@@ -36,18 +38,22 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    val generativeModel =
-                        GenerativeModel(
-                            modelName = AI_MODELS.GEMINI_PRO.key,
-                            apiKey = BuildConfig.apiKey
-                        )
-                    val viewModel = SummarizeViewModel(generativeModel)
+                    val generativeModel = GenerativeModel(modelName = AI_MODELS.GEMINI_PRO.key, apiKey = BuildConfig.apiKey)
+                    val viewModel = ConvoViewModel(generativeModel)
 
                     Scaffold(
                         modifier = Modifier.padding(),
                         topBar = {
                             CenterAlignedTopAppBar(
-                                title = { Text(text = "AIConvo") },
+                                title = {
+                                    Row {
+                                        Text(
+                                            text = "AIConvo_",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.headlineMedium
+                                        )
+                                    }
+                                },
                                 navigationIcon = {
                                     IconButton(onClick = { /*TODO*/ }) {
                                         Icon(
@@ -85,7 +91,7 @@ enum class AI_MODELS(val key: String) {
 }
 
 @Composable
-fun SettingSheetComponent(viewmodel: SummarizeViewModel) {
+fun SettingSheetComponent(viewmodel: ConvoViewModel) {
     Column {
 
     }

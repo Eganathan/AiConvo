@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SummarizeViewModel(
+class ConvoViewModel(
     private val generativeModel: GenerativeModel
 ) : ViewModel() {
 
