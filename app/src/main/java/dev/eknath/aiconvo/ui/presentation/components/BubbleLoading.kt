@@ -1,10 +1,11 @@
+package dev.eknath.aiconvo.ui.presentation.components
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
 @Composable
-fun Loading(visibility: Boolean) {
+fun BubbleLoading(visibility: Boolean) {
     AnimatedVisibility(visible = visibility) {
         val maxProgress = 2
         val animationDuration = 150
@@ -53,7 +54,7 @@ fun Loading(visibility: Boolean) {
 }
 
 @Composable
-fun ProgressIndicator(isActive: Boolean) {
+private fun ProgressIndicator(isActive: Boolean) {
     val activeSize = 15.dp
     val inactiveSize = 12.dp
     val padding = 2.5.dp
