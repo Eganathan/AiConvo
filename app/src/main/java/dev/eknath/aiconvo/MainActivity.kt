@@ -37,7 +37,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.ai.client.generativeai.GenerativeModel
+import dev.eknath.aiconvo.ui.presentation.screens.ChatScreen
 import dev.eknath.aiconvo.ui.presentation.screens.RiddleScreen
 import dev.eknath.aiconvo.ui.theme.AIConvoTheme
 import kotlinx.coroutines.launch
@@ -63,6 +68,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
+                    var screen by remember { mutableStateOf(ACTIVITY.NONE) }
                     val generativeModel = GenerativeModel(
                         modelName = AI_MODELS.GEMINI_PRO.key,
                         apiKey = BuildConfig.apiKey
@@ -73,55 +79,57 @@ class MainActivity : ComponentActivity() {
                     val scope = rememberCoroutineScope()
 
 
-                    ModalNavigationDrawer(
-                        drawerState = drawerState,
-                        drawerContent = {
-                            ModalDrawerSheet(
-                                modifier = Modifier.fillMaxWidth(0.5f),
-                                content = { DrawerContent() })
-                        },
-                    ) {
-                        Scaffold(
-                            modifier = Modifier.padding(),
-                            topBar = {
-                                CenterAlignedTopAppBar(
-                                    title = {
-                                        Row {
-                                            Text(
-                                                text = "AIConvo_",
-                                                fontWeight = FontWeight.SemiBold,
-                                                style = MaterialTheme.typography.headlineSmall
-                                            )
-                                        }
-                                    },
-                                    navigationIcon = {
-                                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Menu,
-                                                contentDescription = ""
-                                            )
-                                        }
-                                    },
-                                    actions = {
-                                        IconButton(onClick = { }) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Settings,
-                                                contentDescription = ""
-                                            )
-                                        }
-                                    },
-                                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                                    )
-                                )
-                            }
+                    if (screen == ACTIVITY.RIDDLE)
+                        RiddleScreen(viewModel = viewModel, { screen = ACTIVITY.NONE })
+                    else
+                        ModalNavigationDrawer(
+                            drawerState = drawerState,
+                            drawerContent = {
+                                ModalDrawerSheet(
+                                    modifier = Modifier.fillMaxWidth(0.5f),
+                                    content = { DrawerContent() })
+                            },
                         ) {
-                            Box(modifier = Modifier.padding(it)) {
-//                                ChatScreen(viewModel)
-                                RiddleScreen(viewModel = viewModel)
+                            Scaffold(
+                                modifier = Modifier.padding(),
+                                topBar = {
+                                    CenterAlignedTopAppBar(
+                                        title = {
+                                            Row {
+                                                Text(
+                                                    text = "AIConvo_",
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    style = MaterialTheme.typography.headlineSmall
+                                                )
+                                            }
+                                        },
+                                        navigationIcon = {
+                                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Menu,
+                                                    contentDescription = ""
+                                                )
+                                            }
+                                        },
+                                        actions = {
+                                            IconButton(onClick = { }) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Settings,
+                                                    contentDescription = ""
+                                                )
+                                            }
+                                        },
+                                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                                        )
+                                    )
+                                }
+                            ) {
+                                Box(modifier = Modifier.padding(it)) {
+                                    ChatScreen(viewModel, {screen = it})
+                                }
                             }
                         }
-                    }
                 }
             }
         }

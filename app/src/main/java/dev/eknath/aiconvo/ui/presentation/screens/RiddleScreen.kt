@@ -1,5 +1,6 @@
 package dev.eknath.aiconvo.ui.presentation.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,7 +46,7 @@ import dev.eknath.aiconvo.ui.presentation.helpers.shareNote
 
 
 @Composable
-fun RiddleScreen(viewModel: ConvoViewModel) {
+fun RiddleScreen(viewModel: ConvoViewModel, onBackPressed: () -> Unit) {
     val context = LocalContext.current
     var score by remember { mutableIntStateOf(0) }
     var input = remember { mutableStateOf(TextFieldValue()) }
@@ -227,6 +228,10 @@ fun RiddleScreen(viewModel: ConvoViewModel) {
     LaunchedEffect(key1 = riddle) {
         if (riddle == null)
             viewModel.fetchARiddle()
+    }
+
+    BackHandler(true) {
+        onBackPressed()
     }
 
 }

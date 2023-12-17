@@ -41,13 +41,7 @@ fun ActivitiesOptions(onClickAction: (ACTIVITY) -> Unit) {
         )
         Spacer(modifier = Modifier.width(10.dp))
 
-        ACTIVITY.entries.filter {
-            listOf(
-                ACTIVITY.TONGUE_TWISTER,
-                ACTIVITY.RIDDLE,
-                ACTIVITY.FUNNY_JOCK
-            ).contains(it)
-        }.reversed()
+        ACTIVITY.entries.filter { ACTIVITY.NONE != it }.reversed()
             .forEach {
                 Button(
                     onClick = { onClickAction(it) }) {

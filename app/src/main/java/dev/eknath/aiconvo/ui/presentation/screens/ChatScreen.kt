@@ -4,6 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,17 +41,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import dev.eknath.aiconvo.ACTIVITY
 import dev.eknath.aiconvo.ConvoViewModel
 import dev.eknath.aiconvo.NetworkState
 import dev.eknath.aiconvo.SummarizeUiState
 import dev.eknath.aiconvo.networkStateProvider
+import dev.eknath.aiconvo.ui.presentation.components.ActivitiesOptions
 import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
 import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 import dev.eknath.aiconvo.ui.presentation.components.QuoteCard
 
 @Composable
-internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
-
+internal fun ChatScreen(
+    summarizeViewModel: ConvoViewModel,
+    onActivitySelected: (ACTIVITY) -> Unit
+) {
     val chatContent by summarizeViewModel.covUiData.collectAsState()
     var promt by remember { mutableStateOf(TextFieldValue()) }
     val isNetWorkAvailable = networkStateProvider()
@@ -73,6 +78,9 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
 
             }
         } else {
+            Row { ActivitiesOptions(onActivitySelected) }
+
+
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
