@@ -40,12 +40,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import dev.eknath.aiconvo.ACTIVITY
 import dev.eknath.aiconvo.ConvoViewModel
 import dev.eknath.aiconvo.NetworkState
 import dev.eknath.aiconvo.SummarizeUiState
 import dev.eknath.aiconvo.networkStateProvider
-import dev.eknath.aiconvo.ui.presentation.components.ActivitiesOptions
 import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
 import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 import dev.eknath.aiconvo.ui.presentation.components.QuoteCard
@@ -57,10 +55,6 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
     var promt by remember { mutableStateOf(TextFieldValue()) }
     val isNetWorkAvailable = networkStateProvider()
     val listState = rememberLazyListState()
-
-
-    var activity by remember { mutableStateOf(ACTIVITY.NONE) }
-
 
     if (isNetWorkAvailable.value == NetworkState.Disconnected)
         NetworkErrorDialog()
@@ -79,41 +73,19 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
 
             }
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-
-                // Prompt based Activities //todo make this navigate
-                when (activity) {
-                    ACTIVITY.RIDDLE -> Box(modifier = Modifier.fillMaxSize()) {
-                        RiddleScreen(viewModel = summarizeViewModel)
-                    }
-
-                    else -> Box(modifier = Modifier.fillMaxSize()) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .fillMaxWidth()
-                        ) {
-                            ActivitiesOptions(onClickAction = { activity = it })
-                        }
-
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            QuoteCard( //todo add a share,reload and save options
-                                summarizeViewModel.techQuote.value?.quote,
-                                summarizeViewModel.techQuote.value?.author
-                            )
-                            Divider(modifier = Modifier.fillMaxWidth(0.6f))
-                            Spacer(modifier = Modifier.height(25.dp))
-                            Button(onClick = { summarizeViewModel.generateContent("Hello!") }) {
-                                Text(text = "Start with a Hello?")
-                            }
-
-                        }
-                    }
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                QuoteCard( //todo add a share,reload and save options
+                    summarizeViewModel.techQuote.value?.quote,
+                    summarizeViewModel.techQuote.value?.author
+                )
+                Divider(modifier = Modifier.fillMaxWidth(0.6f))
+                Spacer(modifier = Modifier.height(25.dp))
+                Button(onClick = { summarizeViewModel.generateContent("Hello!") }) {
+                    Text(text = "Start with a Hello?")
                 }
-
 
             }
         }

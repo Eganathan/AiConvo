@@ -48,7 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.ai.client.generativeai.GenerativeModel
-import dev.eknath.aiconvo.ui.presentation.screens.ChatScreen
+import dev.eknath.aiconvo.ui.presentation.screens.RiddleScreen
 import dev.eknath.aiconvo.ui.theme.AIConvoTheme
 import kotlinx.coroutines.launch
 
@@ -117,7 +117,8 @@ class MainActivity : ComponentActivity() {
                             }
                         ) {
                             Box(modifier = Modifier.padding(it)) {
-                                ChatScreen(viewModel)
+//                                ChatScreen(viewModel)
+                                RiddleScreen(viewModel = viewModel)
                             }
                         }
                     }
