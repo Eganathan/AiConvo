@@ -97,7 +97,6 @@ class ConvoViewModel(
     fun fetchARiddle() {
         viewModelScope.launch {
             val riddleResponse = generativeModel.generateContent(ACTIVITY.RIDDLE.prompt)
-            Log.e("Test","${riddleResponse.text}")
             _riddle.value = riddleData(riddleResponse.text?.cleanJson().orEmpty())
             Log.e("Test","Question: ${riddle.value?.question} Answer: ${riddle.value?.answer}")
         }
@@ -121,7 +120,7 @@ enum class ACTIVITY(val prompt: String) {
     FUNNY_JOCK("Share a funny clean jock"),
     TONGUE_TWISTER("give me a plain tongue twister"),
     RIDDLE("Give me a riddle with answer as a json format like question= and answer= but the answer should be a single word"),
-    MATH_PROBLEM("Give me a fun math problem with answer is a json format like question=\$ and answer=\$"),
+    MATH_PROBLEM("Give me a fun math problem with numeric answer in a json format like question=\$ and answer=\$"),
     NONE("");
 }
 
