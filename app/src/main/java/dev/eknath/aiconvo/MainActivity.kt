@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.ai.client.generativeai.GenerativeModel
 import dev.eknath.aiconvo.ui.presentation.screens.ChatScreen
+import dev.eknath.aiconvo.ui.presentation.screens.MathChallengeScreen
 import dev.eknath.aiconvo.ui.presentation.screens.RiddleScreen
 import dev.eknath.aiconvo.ui.theme.AIConvoTheme
 import kotlinx.coroutines.launch
@@ -79,10 +80,21 @@ class MainActivity : ComponentActivity() {
                     val scope = rememberCoroutineScope()
 
 
-                    if (screen == ACTIVITY.RIDDLE)
-                        RiddleScreen(viewModel = viewModel, { screen = ACTIVITY.NONE })
-                    else
-                        ModalNavigationDrawer(
+                    when (screen) {
+//                        ACTIVITY.TECH_QUOTE -> TODO()
+//                        ACTIVITY.FUNNY_JOCK -> TODO()
+//                        ACTIVITY.TONGUE_TWISTER -> TODO()
+                        ACTIVITY.RIDDLE -> RiddleScreen(
+                            viewModel = viewModel,
+                            activeActivity = screen,
+                            { screen = ACTIVITY.NONE })
+
+                        ACTIVITY.MATH_PROBLEM -> MathChallengeScreen(
+                            viewModel = viewModel,
+                            activeActivity = screen,
+                            { screen = ACTIVITY.NONE })
+
+                        else -> ModalNavigationDrawer(
                             drawerState = drawerState,
                             drawerContent = {
                                 ModalDrawerSheet(
@@ -126,10 +138,11 @@ class MainActivity : ComponentActivity() {
                                 }
                             ) {
                                 Box(modifier = Modifier.padding(it)) {
-                                    ChatScreen(viewModel, {screen = it})
+                                    ChatScreen(viewModel, { screen = it })
                                 }
                             }
                         }
+                    }
                 }
             }
         }

@@ -27,6 +27,10 @@ class ConvoViewModel(
     private val _quote: MutableState<QuoteData?> = mutableStateOf(null)
     val techQuote = _quote
 
+    //currentQuote
+    private val _mathChallenge: MutableState<MathChallenge?> = mutableStateOf(null)
+    val mathChallenge = _mathChallenge
+
     //currentRiddle
     private val _riddle: MutableState<RiddleData?> = mutableStateOf(null)
     val riddle = _riddle
@@ -83,7 +87,7 @@ class ConvoViewModel(
 
     init {
         fetchATechQuote()
-        fetchARiddle()
+        fetchMathChallenge()
     }
 
 
@@ -98,7 +102,20 @@ class ConvoViewModel(
         viewModelScope.launch {
             val riddleResponse = generativeModel.generateContent(ACTIVITY.RIDDLE.prompt)
             _riddle.value = riddleData(riddleResponse.text?.cleanJson().orEmpty())
-            Log.e("Test","Question: ${riddle.value?.question} Answer: ${riddle.value?.answer}")
+            Log.e("Test", "Question: ${riddle.value?.question} Answer: ${riddle.value?.answer}")
+        }
+    }
+
+    fun fetchMathChallenge() {
+        viewModelScope.launch {
+            val mathChallengeResponse =
+                generativeModel.generateContent(ACTIVITY.MATH_PROBLEM.prompt)
+            _mathChallenge.value = mathChallengeData(mathChallengeResponse.text?.cleanJson().orEmpty())
+            Log.e("Test", "MATH RES:${mathChallengeResponse.text}")
+            Log.e(
+                "Test",
+                "MATH:  Question: ${mathChallenge.value?.question} Answer: ${mathChallenge.value?.answer} EXP: ${mathChallenge.value?.explanation}"
+            )
         }
     }
 
@@ -120,7 +137,7 @@ enum class ACTIVITY(val prompt: String) {
     FUNNY_JOCK("Share a funny clean jock"),
     TONGUE_TWISTER("give me a plain tongue twister"),
     RIDDLE("Give me a riddle with answer as a json format like question= and answer= but the answer should be a single word"),
-    MATH_PROBLEM("Give me a fun math problem with numeric answer in a json format like question=\$ and answer=\$"),
+    MATH_PROBLEM("Give me a fun math problem with numeric answer in a json format like question=\$ answer=\$ explanation=\$"),
     NONE("");
 }
 
@@ -134,6 +151,10 @@ data class QuoteData(val quote: String, val author: String)
 
 @JsonClass(generateAdapter = true)
 data class RiddleData(val question: String, val answer: String)
+
+
+@JsonClass(generateAdapter = true)
+data class MathChallenge(val question: String, val answer: String, val explanation: String)
 
 fun techQuote(input: String): QuoteData? {
     val moshi: Moshi = Moshi.Builder()
@@ -155,6 +176,20 @@ fun riddleData(input: String): RiddleData? {
         .build()
 
     val adapter = moshi.adapter(RiddleData::class.java)
+    return try {
+        adapter.fromJson(input)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+
+fun mathChallengeData(input: String): MathChallenge? {
+    val moshi: Moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
+    val adapter = moshi.adapter(MathChallenge::class.java)
     return try {
         adapter.fromJson(input)
     } catch (e: Exception) {

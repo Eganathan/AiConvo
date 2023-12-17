@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import dev.eknath.aiconvo.ACTIVITY
 import dev.eknath.aiconvo.ConvoViewModel
 import dev.eknath.aiconvo.ui.presentation.components.DefaultBackButton
 import dev.eknath.aiconvo.ui.presentation.components.LoadingOrContentCard
@@ -51,7 +52,7 @@ import dev.eknath.aiconvo.ui.presentation.helpers.shareNote
 
 
 @Composable
-fun RiddleScreen(viewModel: ConvoViewModel, onBackPressed: () -> Unit) {
+fun RiddleScreen(viewModel: ConvoViewModel, activeActivity: ACTIVITY, onBackPressed: () -> Unit) {
     val context = LocalContext.current
     var score by remember { mutableIntStateOf(0) }
     var input = remember { mutableStateOf(TextFieldValue()) }
@@ -242,7 +243,7 @@ fun RiddleScreen(viewModel: ConvoViewModel, onBackPressed: () -> Unit) {
 
 
     LaunchedEffect(key1 = riddle) {
-        if (riddle == null)
+        if (riddle == null && activeActivity == ACTIVITY.RIDDLE)
             viewModel.fetchARiddle()
     }
 
