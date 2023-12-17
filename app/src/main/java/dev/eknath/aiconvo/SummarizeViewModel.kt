@@ -1,5 +1,6 @@
 package dev.eknath.aiconvo
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -25,6 +26,10 @@ class ConvoViewModel(
     //currentQuote
     private val _quote: MutableState<QuoteData?> = mutableStateOf(null)
     val techQuote = _quote
+
+    //currentRiddle
+    private val _riddle: MutableState<RiddleData?> = mutableStateOf(null)
+    val riddle = _riddle
 
     fun generateContent(inputText: String) {
         val inputConv =
@@ -78,12 +83,23 @@ class ConvoViewModel(
 
     init {
         fetchATechQuote()
+        fetchARiddle()
     }
+
 
     fun fetchATechQuote() {
         viewModelScope.launch {
             val techQuote = generativeModel.generateContent(ACTIVITY.TECH_QUOTE.prompt)
             _quote.value = techQuote(techQuote.text?.cleanJson().orEmpty())
+        }
+    }
+
+    fun fetchARiddle() {
+        viewModelScope.launch {
+            val riddleResponse = generativeModel.generateContent(ACTIVITY.RIDDLE.prompt)
+            Log.e("Test","${riddleResponse.text}")
+            _riddle.value = riddleData(riddleResponse.text?.cleanJson().orEmpty())
+            Log.e("Test","Question: ${riddle.value?.question} Answer: ${riddle.value?.answer}")
         }
     }
 
@@ -104,7 +120,7 @@ enum class ACTIVITY(val prompt: String) {
     TECH_QUOTE("Give me a single random tech related quote and author in a json format like quote=$ and author=$"),
     FUNNY_JOCK("Share a funny clean jock"),
     TONGUE_TWISTER("give me a plain tongue twister"),
-    RIDDLE("Give me a riddle with answer as a json format like question=\$ and answer=\$"),
+    RIDDLE("Give me a riddle with answer as a json format like question= and answer= but the answer should be a single word"),
     MATH_PROBLEM("Give me a fun math problem with answer is a json format like question=\$ and answer=\$"),
     NONE("");
 }
@@ -114,11 +130,11 @@ fun String.cleanJson(): String {
 }
 
 
-
-
-
 @JsonClass(generateAdapter = true)
 data class QuoteData(val quote: String, val author: String)
+
+@JsonClass(generateAdapter = true)
+data class RiddleData(val question: String, val answer: String)
 
 fun techQuote(input: String): QuoteData? {
     val moshi: Moshi = Moshi.Builder()
@@ -126,6 +142,20 @@ fun techQuote(input: String): QuoteData? {
         .build()
 
     val adapter = moshi.adapter(QuoteData::class.java)
+    return try {
+        adapter.fromJson(input)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+
+fun riddleData(input: String): RiddleData? {
+    val moshi: Moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
+    val adapter = moshi.adapter(RiddleData::class.java)
     return try {
         adapter.fromJson(input)
     } catch (e: Exception) {
