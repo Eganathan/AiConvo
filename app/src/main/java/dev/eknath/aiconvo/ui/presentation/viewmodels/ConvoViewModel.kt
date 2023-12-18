@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -30,12 +31,16 @@ class ConvoViewModel(
     val techQuote = _quote
 
     //currentQuote
-    private val _mathChallenge: MutableState<MathChallenge?> = mutableStateOf(null)
-    val mathChallenge = _mathChallenge
+    private val _mathChallenge: MutableStateFlow<MathChallenge?> = MutableStateFlow(null)
+    val mathChallenge = _mathChallenge.asStateFlow()
 
     //currentRiddle
     private val _riddle: MutableState<RiddleData?> = mutableStateOf(null)
     val riddle = _riddle
+
+    init {
+        fetchATechQuote()
+    }
 
     fun generateContent(inputText: String) {
         val inputConv =
@@ -49,12 +54,10 @@ class ConvoViewModel(
             it.plus(aiPreConv)
         }
 
-
-        val prompt = "$inputText"
         viewModelScope.launch {
             try {
-                val response = generativeModel.generateContent(prompt)
-                response.text?.let { outputContent ->
+                val response = prompt(inputText)
+                response?.text?.let { outputContent ->
                     _covUiData.update {
                         it.dropLast(1)
                     }
@@ -87,38 +90,42 @@ class ConvoViewModel(
         }
     }
 
-    init {
-        fetchATechQuote()
-        fetchMathChallenge()
-    }
-
-
-    private fun fetchATechQuote() {
+    fun fetchATechQuote() {
         viewModelScope.launch {
-            val techQuote = generativeModel.generateContent(PROMPT_ACTIVITY.TECH_QUOTE.prompt)
-            _quote.value = techQuote(techQuote.text?.cleanJson().orEmpty())
+            val techQuote = prompt(PROMPT_ACTIVITY.TECH_QUOTE.prompt)
+            _quote.value = techQuote(techQuote?.text?.cleanJson().orEmpty())
         }
     }
 
     fun fetchARiddle() {
         viewModelScope.launch {
-            val riddleResponse = generativeModel.generateContent(PROMPT_ACTIVITY.RIDDLE.prompt)
-            _riddle.value = riddleData(riddleResponse.text?.cleanJson().orEmpty())
+            val riddleResponse = prompt(PROMPT_ACTIVITY.RIDDLE.prompt)
+            _riddle.value = riddleData(riddleResponse?.text?.cleanJson().orEmpty())
             Log.e("Test", "Question: ${riddle.value?.question} Answer: ${riddle.value?.answer}")
         }
     }
 
     fun fetchMathChallenge() {
         viewModelScope.launch {
-            val mathChallengeResponse =
-                generativeModel.generateContent(PROMPT_ACTIVITY.MATH_PROBLEM.prompt)
-            _mathChallenge.value =
-                mathChallengeData(mathChallengeResponse.text?.cleanJson().orEmpty())
-            Log.e("Test", "MATH RES:${mathChallengeResponse.text}")
-            Log.e(
-                "Test",
-                "MATH:  Question: ${mathChallenge.value?.question} Answer: ${mathChallenge.value?.answer} EXP: ${mathChallenge.value?.explanation}"
-            )
+            prompt(PROMPT_ACTIVITY.MATH_PROBLEM.prompt)?.run {
+                _mathChallenge.update { mathChallengeData(this.text?.cleanJson().orEmpty()) }
+                Log.e("Test", "MATH RES:${this.text}")
+                Log.e(
+                    "Test",
+                    "MATH:  Question: ${mathChallenge.value?.question} Answer: ${mathChallenge.value?.answer} EXP: ${mathChallenge.value?.explanation}"
+                )
+            } ?: {
+                _mathChallenge.update { null }
+            }
+        }
+    }
+
+    private suspend fun prompt(input: String): GenerateContentResponse? {
+        return try {
+            generativeModel.generateContent(input)
+        } catch (e: Exception) {
+            Log.e("Error", e.localizedMessage.orEmpty())
+            null
         }
     }
 

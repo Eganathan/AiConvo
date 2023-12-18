@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
@@ -41,6 +42,7 @@ fun NetworkErrorDialog() {
                 modifier = Modifier.size(50.dp)
             )
             Text(text = "Network Issue!", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "kindly please connect to a network with internet connection", style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
             BubbleLoading(visibility = true)
         }
     }

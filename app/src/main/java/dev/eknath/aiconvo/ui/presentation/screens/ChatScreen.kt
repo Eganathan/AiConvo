@@ -43,10 +43,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import dev.eknath.aiconvo.ui.presentation.components.ActivitiesOptions
 import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
-import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 import dev.eknath.aiconvo.ui.presentation.components.QuoteCard
-import dev.eknath.aiconvo.ui.presentation.helpers.NetworkState
-import dev.eknath.aiconvo.ui.presentation.helpers.networkStateProvider
 import dev.eknath.aiconvo.ui.presentation.states.UiState
 import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 
@@ -56,11 +53,8 @@ internal fun ChatScreen(data: ScreenParams) {
     val viewModel = remember{ConvoViewModel(data.generativeViewModel)}
     val chatContent by viewModel.covUiData.collectAsState()
     var promt by remember { mutableStateOf(TextFieldValue()) }
-    val isNetWorkAvailable = networkStateProvider()
     val listState = rememberLazyListState()
 
-    if (isNetWorkAvailable.value == NetworkState.Disconnected)
-        NetworkErrorDialog()
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (chatContent.isNotEmpty()) {
@@ -165,6 +159,11 @@ internal fun ChatScreen(data: ScreenParams) {
 
         LaunchedEffect(key1 = chatContent) {
             listState.scrollToItem((chatContent.size))
+        }
+
+        LaunchedEffect(key1 = viewModel.techQuote) {
+            if(viewModel.techQuote == null)
+                viewModel.techQuote
         }
     }
 }
