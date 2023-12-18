@@ -107,7 +107,7 @@ class ConvoViewModel(
 
     fun fetchMathChallenge() {
         viewModelScope.launch {
-            prompt(PROMPT_ACTIVITY.MATH_PROBLEM.prompt)?.run {
+            prompt(PROMPT_ACTIVITY.MATH_CHALLENGE.prompt)?.run {
                 _mathChallenge.update { mathChallengeData(this.text?.cleanJson().orEmpty()) }
                 Log.e("Test", "MATH RES:${this.text}")
                 Log.e(

@@ -41,7 +41,7 @@ fun ActivitiesOptions(onClickAction: (PROMPT_ACTIVITY) -> Unit) {
         )
         Spacer(modifier = Modifier.width(10.dp))
 
-        PROMPT_ACTIVITY.entries.forEach {
+        listOf(PROMPT_ACTIVITY.RIDDLE,PROMPT_ACTIVITY.MATH_CHALLENGE,).forEach {
             Button(
                 onClick = { onClickAction(it) }) {
                 Text(text = it.name.replace("_", " "))

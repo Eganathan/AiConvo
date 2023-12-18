@@ -13,7 +13,7 @@ enum class PROMPT_ACTIVITY(val prompt: String, val routes: ROUTES) {
         "Give me a riddle with answer as a json format like question= and answer= but the answer should be a single word",
         routes = ROUTES.RIDDLES
     ),
-    MATH_PROBLEM(
+    MATH_CHALLENGE(
         "Give me a fun math problem with numeric answer in a json format like question=\$ answer=\$ explanation=\$",
         routes = ROUTES.MATH_CHALLENGE
     ),
