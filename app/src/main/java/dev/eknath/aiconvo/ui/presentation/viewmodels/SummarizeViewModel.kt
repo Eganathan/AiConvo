@@ -1,4 +1,4 @@
-package dev.eknath.aiconvo
+package dev.eknath.aiconvo.ui.presentation.viewmodels
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
@@ -9,6 +9,8 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import dev.eknath.aiconvo.ui.enums.PROMPT_ACTIVITY
+import dev.eknath.aiconvo.ui.presentation.states.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,8 +39,8 @@ class ConvoViewModel(
 
     fun generateContent(inputText: String) {
         val inputConv =
-            Conv(owner = Owner.USER, value = inputText, state = SummarizeUiState.Success(""))
-        val aiPreConv = Conv(owner = Owner.AI, value = "", state = SummarizeUiState.Loading)
+            Conv(owner = Owner.USER, value = inputText, state = UiState.Success)
+        val aiPreConv = Conv(owner = Owner.AI, value = "", state = UiState.Loading)
 
         _covUiData.update {
             it.plus(inputConv)
@@ -62,7 +64,7 @@ class ConvoViewModel(
                                 id = aiPreConv.id,
                                 owner = aiPreConv.owner,
                                 value = outputContent,
-                                state = SummarizeUiState.Success("")
+                                state = UiState.Success
                             )
                         )
                     }
@@ -77,7 +79,7 @@ class ConvoViewModel(
                             id = aiPreConv.id,
                             owner = aiPreConv.owner,
                             value = e.localizedMessage ?: "Something Went Wrong!",
-                            state = SummarizeUiState.Error(e.localizedMessage ?: "Some Error!")
+                            state = UiState.Error
                         )
                     )
                 }
@@ -91,16 +93,16 @@ class ConvoViewModel(
     }
 
 
-    fun fetchATechQuote() {
+    private fun fetchATechQuote() {
         viewModelScope.launch {
-            val techQuote = generativeModel.generateContent(ACTIVITY.TECH_QUOTE.prompt)
+            val techQuote = generativeModel.generateContent(PROMPT_ACTIVITY.TECH_QUOTE.prompt)
             _quote.value = techQuote(techQuote.text?.cleanJson().orEmpty())
         }
     }
 
     fun fetchARiddle() {
         viewModelScope.launch {
-            val riddleResponse = generativeModel.generateContent(ACTIVITY.RIDDLE.prompt)
+            val riddleResponse = generativeModel.generateContent(PROMPT_ACTIVITY.RIDDLE.prompt)
             _riddle.value = riddleData(riddleResponse.text?.cleanJson().orEmpty())
             Log.e("Test", "Question: ${riddle.value?.question} Answer: ${riddle.value?.answer}")
         }
@@ -109,8 +111,9 @@ class ConvoViewModel(
     fun fetchMathChallenge() {
         viewModelScope.launch {
             val mathChallengeResponse =
-                generativeModel.generateContent(ACTIVITY.MATH_PROBLEM.prompt)
-            _mathChallenge.value = mathChallengeData(mathChallengeResponse.text?.cleanJson().orEmpty())
+                generativeModel.generateContent(PROMPT_ACTIVITY.MATH_PROBLEM.prompt)
+            _mathChallenge.value =
+                mathChallengeData(mathChallengeResponse.text?.cleanJson().orEmpty())
             Log.e("Test", "MATH RES:${mathChallengeResponse.text}")
             Log.e(
                 "Test",
@@ -121,25 +124,16 @@ class ConvoViewModel(
 
 }
 
+//datas
 class Conv(
     val id: Long = System.currentTimeMillis(),
     val owner: Owner,
     val value: String,
-    val state: SummarizeUiState
+    val state: UiState
 )
 
-enum class Owner {
-    AI, USER
-}
+enum class Owner { AI, USER }
 
-enum class ACTIVITY(val prompt: String) {
-    TECH_QUOTE("Give me a single random tech related quote and author in a json format like quote=$ and author=$"),
-    FUNNY_JOCK("Share a funny clean jock"),
-    TONGUE_TWISTER("give me a plain tongue twister"),
-    RIDDLE("Give me a riddle with answer as a json format like question= and answer= but the answer should be a single word"),
-    MATH_PROBLEM("Give me a fun math problem with numeric answer in a json format like question=\$ answer=\$ explanation=\$"),
-    NONE("");
-}
 
 fun String.cleanJson(): String {
     return this.replace("`", "").replace("json", "")

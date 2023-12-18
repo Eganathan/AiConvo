@@ -20,11 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import dev.eknath.aiconvo.ACTIVITY
 import dev.eknath.aiconvo.R
+import dev.eknath.aiconvo.ui.enums.PROMPT_ACTIVITY
 
 @Composable
-fun ActivitiesOptions(onClickAction: (ACTIVITY) -> Unit) {
+fun ActivitiesOptions(onClickAction: (PROMPT_ACTIVITY) -> Unit) {
     val scrollState = rememberScrollState()
     Row(
         modifier = Modifier
@@ -41,19 +41,18 @@ fun ActivitiesOptions(onClickAction: (ACTIVITY) -> Unit) {
         )
         Spacer(modifier = Modifier.width(10.dp))
 
-        ACTIVITY.entries.filter { ACTIVITY.NONE != it }.reversed()
-            .forEach {
-                Button(
-                    onClick = { onClickAction(it) }) {
-                    Text(text = it.name.replace("_", " "))
-                }
-                Card(
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .padding(horizontal = 3.dp)
-                        .size(7.dp),
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary)
-                ) {}
+        PROMPT_ACTIVITY.entries.forEach {
+            Button(
+                onClick = { onClickAction(it) }) {
+                Text(text = it.name.replace("_", " "))
             }
+            Card(
+                shape = CircleShape,
+                modifier = Modifier
+                    .padding(horizontal = 3.dp)
+                    .size(7.dp),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary)
+            ) {}
+        }
     }
 }

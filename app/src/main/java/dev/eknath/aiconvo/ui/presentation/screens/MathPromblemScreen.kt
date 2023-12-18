@@ -1,7 +1,6 @@
 package dev.eknath.aiconvo.ui.presentation.screens
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,26 +17,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dev.eknath.aiconvo.ACTIVITY
-import dev.eknath.aiconvo.ConvoViewModel
+import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 import dev.eknath.aiconvo.ui.presentation.components.LoadingOrContentCard
 
+
 @Composable
-fun MathChallengeScreen(
-    viewModel: ConvoViewModel,
-    activeActivity: ACTIVITY,
-    onActivitySelected: (ACTIVITY) -> Unit
-) {
+internal fun MathChallengeScreen(data: ScreenParams) {
 
-    val onBackPressed = { onActivitySelected.invoke(ACTIVITY.NONE) }
+    val viewModel = ConvoViewModel(data.generativeViewModel)
     val challenge by remember { derivedStateOf { viewModel.mathChallenge.value } }
-
     Scaffold(
         topBar = {
             ActivityScreenTopBar(
                 title = "Math Challenge",
                 enabled = true,
-                onBackPressed = onBackPressed
+                onBackPressed = { data.navController.navigateUp() }
             )
         }
     ) {
@@ -64,14 +58,11 @@ fun MathChallengeScreen(
             }
         }
     }
-    BackHandler(enabled = true) {
-        onBackPressed()
-    }
 
     LaunchedEffect(challenge) {
-        if (challenge == null && activeActivity == ACTIVITY.MATH_PROBLEM) {
+        if (challenge == null) {
             viewModel.fetchMathChallenge()
-            Log.e("Test","Fired!")
+            Log.e("Test", "Fired!")
         }
     }
 }

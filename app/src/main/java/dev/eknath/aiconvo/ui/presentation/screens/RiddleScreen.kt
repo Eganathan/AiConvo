@@ -1,6 +1,5 @@
 package dev.eknath.aiconvo.ui.presentation.screens
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,24 +42,33 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import dev.eknath.aiconvo.ACTIVITY
-import dev.eknath.aiconvo.ConvoViewModel
+import androidx.navigation.NavController
+import com.google.ai.client.generativeai.GenerativeModel
 import dev.eknath.aiconvo.ui.presentation.components.DefaultBackButton
 import dev.eknath.aiconvo.ui.presentation.components.LoadingOrContentCard
 import dev.eknath.aiconvo.ui.presentation.components.RiddleInputField
 import dev.eknath.aiconvo.ui.presentation.components.TimerButton
 import dev.eknath.aiconvo.ui.presentation.helpers.shareNote
+import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 
+
+@Stable
+data class ScreenParams(
+    val navController: NavController,
+    val generativeViewModel: GenerativeModel
+)
 
 @Composable
-fun RiddleScreen(viewModel: ConvoViewModel, activeActivity: ACTIVITY, onBackPressed: () -> Unit) {
+fun RiddleScreen(data: ScreenParams) {
+
+    val viewModel = remember { ConvoViewModel(data.generativeViewModel) }
+
     val context = LocalContext.current
     var score by remember { mutableIntStateOf(0) }
     var input = remember { mutableStateOf(TextFieldValue()) }
     var riddle by remember { viewModel.riddle }
     var revealAnswer by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
-
 
     val onSubmit = {
         if (input.value.text.lowercase() == riddle?.answer?.lowercase()) {
@@ -74,7 +83,10 @@ fun RiddleScreen(viewModel: ConvoViewModel, activeActivity: ACTIVITY, onBackPres
     }
     Scaffold(
         topBar = {
-            ActivityScreenTopBar(title = "Riddle", enabled = true, onBackPressed = onBackPressed)
+            ActivityScreenTopBar(
+                title = "Riddle",
+                enabled = true,
+                onBackPressed = { data.navController.navigateUp() })
         }
     ) {
         Column(Modifier.padding(it)) {
@@ -243,12 +255,8 @@ fun RiddleScreen(viewModel: ConvoViewModel, activeActivity: ACTIVITY, onBackPres
 
 
     LaunchedEffect(key1 = riddle) {
-        if (riddle == null && activeActivity == ACTIVITY.RIDDLE)
+        if (riddle == null)
             viewModel.fetchARiddle()
-    }
-
-    BackHandler(true) {
-        onBackPressed()
     }
 
 }

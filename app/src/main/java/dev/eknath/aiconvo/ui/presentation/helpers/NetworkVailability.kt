@@ -1,4 +1,4 @@
-package dev.eknath.aiconvo
+package dev.eknath.aiconvo.ui.presentation.helpers
 
 import android.content.Context
 import android.net.ConnectivityManager

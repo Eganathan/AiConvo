@@ -41,22 +41,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import dev.eknath.aiconvo.ACTIVITY
-import dev.eknath.aiconvo.ConvoViewModel
-import dev.eknath.aiconvo.NetworkState
-import dev.eknath.aiconvo.SummarizeUiState
-import dev.eknath.aiconvo.networkStateProvider
 import dev.eknath.aiconvo.ui.presentation.components.ActivitiesOptions
 import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
 import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 import dev.eknath.aiconvo.ui.presentation.components.QuoteCard
+import dev.eknath.aiconvo.ui.presentation.helpers.NetworkState
+import dev.eknath.aiconvo.ui.presentation.helpers.networkStateProvider
+import dev.eknath.aiconvo.ui.presentation.states.UiState
+import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 
 @Composable
-internal fun ChatScreen(
-    summarizeViewModel: ConvoViewModel,
-    onActivitySelected: (ACTIVITY) -> Unit
-) {
-    val chatContent by summarizeViewModel.covUiData.collectAsState()
+internal fun ChatScreen(data: ScreenParams) {
+
+    val viewModel = remember{ConvoViewModel(data.generativeViewModel)}
+    val chatContent by viewModel.covUiData.collectAsState()
     var promt by remember { mutableStateOf(TextFieldValue()) }
     val isNetWorkAvailable = networkStateProvider()
     val listState = rememberLazyListState()
@@ -78,20 +76,22 @@ internal fun ChatScreen(
 
             }
         } else {
-            Row { ActivitiesOptions(onActivitySelected) }
+            Row { ActivitiesOptions({ data.navController.navigate(route = it.routes.name) }) }
 
 
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 QuoteCard( //todo add a share,reload and save options
-                    summarizeViewModel.techQuote.value?.quote,
-                    summarizeViewModel.techQuote.value?.author
+                    viewModel.techQuote.value?.quote,
+                    viewModel.techQuote.value?.author
                 )
+
                 Divider(modifier = Modifier.fillMaxWidth(0.6f))
                 Spacer(modifier = Modifier.height(25.dp))
-                Button(onClick = { summarizeViewModel.generateContent("Hello!") }) {
+                Button(onClick = { viewModel.generateContent("Hello!") }) {
                     Text(text = "Start with a Hello?")
                 }
 
@@ -117,7 +117,7 @@ internal fun ChatScreen(
                     )
             ) {
                 TextField(
-                    enabled = chatContent.lastOrNull()?.state != SummarizeUiState.Loading,
+                    enabled = chatContent.lastOrNull()?.state != UiState.Loading,
                     value = promt,
                     placeholder = { Text(text = "Please type your question here...") },
                     onValueChange = { promt = it },
@@ -128,8 +128,8 @@ internal fun ChatScreen(
                         autoCorrect = true
                     ),
                     keyboardActions = KeyboardActions(onDone = {
-                        if (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != SummarizeUiState.Loading) {
-                            summarizeViewModel::generateContent.invoke(promt.text)
+                        if (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != UiState.Loading) {
+                            viewModel::generateContent.invoke(promt.text)
                             promt = TextFieldValue()
                         }
                     }),
@@ -141,9 +141,9 @@ internal fun ChatScreen(
                                     .wrapContentSize()
                                     .padding(end = 5.dp),
                                 shape = RoundedCornerShape(5.dp),
-                                enabled = (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != SummarizeUiState.Loading),
+                                enabled = (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != UiState.Loading),
                                 onClick = {
-                                    summarizeViewModel::generateContent.invoke(promt.text)
+                                    viewModel::generateContent.invoke(promt.text)
                                     promt = TextFieldValue("")
 
                                 }

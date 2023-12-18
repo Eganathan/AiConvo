@@ -1,4 +1,4 @@
-package dev.eknath.aiconvo.ui.presentation
+package dev.eknath.aiconvo.ui.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.google.ai.client.generativeai.GenerativeModel

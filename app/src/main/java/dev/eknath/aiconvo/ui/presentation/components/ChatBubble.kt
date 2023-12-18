@@ -27,11 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import dev.eknath.aiconvo.Conv
-import dev.eknath.aiconvo.Owner
 import dev.eknath.aiconvo.R
-import dev.eknath.aiconvo.SummarizeUiState
 import dev.eknath.aiconvo.ui.presentation.helpers.shareNote
+import dev.eknath.aiconvo.ui.presentation.states.UiState
+import dev.eknath.aiconvo.ui.presentation.viewmodels.Conv
+import dev.eknath.aiconvo.ui.presentation.viewmodels.Owner
 
 @Composable
 fun ConversationBubble(
@@ -72,7 +72,7 @@ fun ConversationContentUI(input: Conv) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (input.owner == Owner.AI) Arrangement.Start else Arrangement.End
     ) {
-        if (input.state is SummarizeUiState.Error) {
+        if (input.state is UiState.Error) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Icon(
                     imageVector = Icons.Rounded.Warning,
@@ -82,9 +82,9 @@ fun ConversationContentUI(input: Conv) {
                 )
                 Text(text = "Sorry,faced some error!", style = MaterialTheme.typography.bodySmall)
             }
-        } else if (input.state is SummarizeUiState.Loading) {
+        } else if (input.state is UiState.Loading) {
             BubbleLoading(true)
-        } else if (input.state is SummarizeUiState.Success) {
+        } else if (input.state is UiState.Success) {
             ConversationBubble(message = input.value, sender = (input.owner == Owner.USER))
         }
     }
