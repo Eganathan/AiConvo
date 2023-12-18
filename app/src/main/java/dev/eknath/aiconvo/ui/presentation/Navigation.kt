@@ -19,7 +19,7 @@ enum class ROUTES {
 }
 
 @Composable
-fun App() {
+fun Application() {
     val generativeModel = remember {
         GenerativeModel(
             modelName = AI_MODELS.GEMINI_PRO.key,
