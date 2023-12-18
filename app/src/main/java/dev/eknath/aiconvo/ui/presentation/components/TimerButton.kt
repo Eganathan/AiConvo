@@ -15,7 +15,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun <T> TimerButton(
-    waitTime: Long = 6000,
+    waitTime: Long = 3000,
     key: T,
     onClick: () -> Unit
 ) {
