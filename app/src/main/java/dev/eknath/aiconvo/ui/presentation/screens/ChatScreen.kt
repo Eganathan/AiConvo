@@ -4,6 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,30 +41,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import dev.eknath.aiconvo.ACTIVITY
-import dev.eknath.aiconvo.ConvoViewModel
-import dev.eknath.aiconvo.NetworkState
-import dev.eknath.aiconvo.SummarizeUiState
-import dev.eknath.aiconvo.networkStateProvider
 import dev.eknath.aiconvo.ui.presentation.components.ActivitiesOptions
 import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
-import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
 import dev.eknath.aiconvo.ui.presentation.components.QuoteCard
+import dev.eknath.aiconvo.ui.presentation.states.UiState
+import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 
 @Composable
-internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
+internal fun ChatScreen(data: ScreenParams) {
 
-    val chatContent by summarizeViewModel.covUiData.collectAsState()
+    val viewModel = remember{ConvoViewModel(data.generativeViewModel)}
+    val chatContent by viewModel.covUiData.collectAsState()
     var promt by remember { mutableStateOf(TextFieldValue()) }
-    val isNetWorkAvailable = networkStateProvider()
     val listState = rememberLazyListState()
 
-
-    var activity by remember { mutableStateOf(ACTIVITY.NONE) }
-
-
-    if (isNetWorkAvailable.value == NetworkState.Disconnected)
-        NetworkErrorDialog()
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (chatContent.isNotEmpty()) {
@@ -79,41 +70,24 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
 
             }
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Row { ActivitiesOptions({ data.navController.navigate(route = it.routes.name) }) }
 
-                // Prompt based Activities //todo make this navigate
-                when (activity) {
-                    ACTIVITY.RIDDLE -> Box(modifier = Modifier.fillMaxSize()) {
-                        RiddleScreen(viewModel = summarizeViewModel)
-                    }
 
-                    else -> Box(modifier = Modifier.fillMaxSize()) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .fillMaxWidth()
-                        ) {
-                            ActivitiesOptions(onClickAction = { activity = it })
-                        }
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            QuoteCard( //todo add a share,reload and save options
-                                summarizeViewModel.techQuote.value?.quote,
-                                summarizeViewModel.techQuote.value?.author
-                            )
-                            Divider(modifier = Modifier.fillMaxWidth(0.6f))
-                            Spacer(modifier = Modifier.height(25.dp))
-                            Button(onClick = { summarizeViewModel.generateContent("Hello!") }) {
-                                Text(text = "Start with a Hello?")
-                            }
+                QuoteCard( //todo add a share,reload and save options
+                    viewModel.techQuote.value?.quote,
+                    viewModel.techQuote.value?.author
+                )
 
-                        }
-                    }
+                Divider(modifier = Modifier.fillMaxWidth(0.6f))
+                Spacer(modifier = Modifier.height(25.dp))
+                Button(onClick = { viewModel.generateContent("Hello!") }) {
+                    Text(text = "Start with a Hello?")
                 }
-
 
             }
         }
@@ -137,7 +111,7 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
                     )
             ) {
                 TextField(
-                    enabled = chatContent.lastOrNull()?.state != SummarizeUiState.Loading,
+                    enabled = chatContent.lastOrNull()?.state != UiState.Loading,
                     value = promt,
                     placeholder = { Text(text = "Please type your question here...") },
                     onValueChange = { promt = it },
@@ -148,8 +122,8 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
                         autoCorrect = true
                     ),
                     keyboardActions = KeyboardActions(onDone = {
-                        if (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != SummarizeUiState.Loading) {
-                            summarizeViewModel::generateContent.invoke(promt.text)
+                        if (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != UiState.Loading) {
+                            viewModel::generateContent.invoke(promt.text)
                             promt = TextFieldValue()
                         }
                     }),
@@ -161,9 +135,9 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
                                     .wrapContentSize()
                                     .padding(end = 5.dp),
                                 shape = RoundedCornerShape(5.dp),
-                                enabled = (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != SummarizeUiState.Loading),
+                                enabled = (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != UiState.Loading),
                                 onClick = {
-                                    summarizeViewModel::generateContent.invoke(promt.text)
+                                    viewModel::generateContent.invoke(promt.text)
                                     promt = TextFieldValue("")
 
                                 }
@@ -185,6 +159,11 @@ internal fun ChatScreen(summarizeViewModel: ConvoViewModel) {
 
         LaunchedEffect(key1 = chatContent) {
             listState.scrollToItem((chatContent.size))
+        }
+
+        LaunchedEffect(key1 = viewModel.techQuote) {
+            if(viewModel.techQuote == null)
+                viewModel.techQuote
         }
     }
 }
