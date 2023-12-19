@@ -20,5 +20,7 @@ enum class PROMPT_ACTIVITY(val prompt: String, val routes: ROUTES) {
     TECH_AND_SCIENCE_NEWS(
         "Give me 5 top and open source news related to each Tech and Science and i want it in a json like {\"news\": [{type: ,headline: , summary: , link: , imageLink:]}",
         routes = ROUTES.TECH_NEWS
-    )
+    ),
+    LOGICAl_APPTITUDE("prompt = Can you give me a logical aptitude test with 4 options for example { \"exam\":[{\"question\":  \"options\":[{\"option_id\":  \"option\":}], \"answer\":  \"explanation\":}]}", routes = ROUTES.HOME),
+    ANALYTICAL_APPTITUDE("prompt = Can you give me a analytical aptitude test with 4 options for example { \"exam\":[{\"question\":  \"options\":[{\"option_id\":  \"option\":}], \"answer\":  \"explanation\":}]}", routes = ROUTES.HOME)
 }
