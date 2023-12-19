@@ -38,6 +38,10 @@ class ConvoViewModel(
     private val _riddle: MutableState<RiddleData?> = mutableStateOf(null)
     val riddle = _riddle
 
+    //news
+    private val _news: MutableStateFlow<ContentState<News?>> = MutableStateFlow(ContentState(null, state = UiState.Initial))
+    val news: StateFlow<ContentState<News?>> = _news.asStateFlow()
+
     init {
         fetchATechQuote()
     }
@@ -107,15 +111,32 @@ class ConvoViewModel(
 
     fun fetchMathChallenge() {
         viewModelScope.launch {
-            prompt(PROMPT_ACTIVITY.MATH_CHALLENGE.prompt)?.run {
-                _mathChallenge.update { mathChallengeData(this.text?.cleanJson().orEmpty()) }
-                Log.e("Test", "MATH RES:${this.text}")
-                Log.e(
-                    "Test",
-                    "MATH:  Question: ${mathChallenge.value?.question} Answer: ${mathChallenge.value?.answer} EXP: ${mathChallenge.value?.explanation}"
-                )
-            } ?: {
-                _mathChallenge.update { null }
+            val promptResponse = prompt(PROMPT_ACTIVITY.MATH_CHALLENGE.prompt)
+            _mathChallenge.update { mathChallengeData(promptResponse?.text?.cleanJson().orEmpty()) }
+            Log.e(
+                "Test",
+                "MATH RES:${promptResponse?.text} feedback: ${promptResponse?.promptFeedback}"
+            )
+            Log.e(
+                "Test",
+                "MATH:  Question: ${mathChallenge.value?.question} Answer: ${mathChallenge.value?.answer} EXP: ${mathChallenge.value?.explanation}"
+            )
+        }
+    }
+
+    fun fetchNews() {
+        viewModelScope.launch {
+            Log.e("Test", "Loading")
+            _news.update { it.copy(state = UiState.Loading) }
+            val promptResponse = prompt(PROMPT_ACTIVITY.TECH_AND_SCIENCE_NEWS.prompt)
+            val response = newsData(promptResponse?.text?.cleanJson().orEmpty())
+
+            if (response != null) {
+                _news.update { it.copy(value = response, state = UiState.Success) }
+                Log.e("Test", "Res: ${news.value.value?.news?.map { it.headline }}")
+            } else {
+                _news.update { it.copy(value = null, state = UiState.Error) }
+                Log.e("Test", "Failed")
             }
         }
     }
@@ -157,6 +178,19 @@ data class RiddleData(val question: String, val answer: String)
 @JsonClass(generateAdapter = true)
 data class MathChallenge(val question: String, val answer: String, val explanation: String)
 
+@JsonClass(generateAdapter = true)
+data class NewsItem(
+    val type: String,
+    val headline: String,
+    val summary: String,
+    val link: String,
+    val imageLink: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class News(val news: List<NewsItem>)
+
+
 fun techQuote(input: String): QuoteData? {
     val moshi: Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -197,3 +231,24 @@ fun mathChallengeData(input: String): MathChallenge? {
         null
     }
 }
+
+
+fun newsData(input: String): News? {
+    val moshi: Moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
+    val adapter = moshi.adapter(News::class.java)
+    return try {
+        Log.e("Test", "INPUT:$input")
+        adapter.fromJson(input)
+    } catch (e: Exception) {
+        Log.e("Test", "${e.message}")
+        null
+    }
+}
+
+data class ContentState<T>(
+    val value: T,
+    val state: UiState = UiState.Loading,
+)

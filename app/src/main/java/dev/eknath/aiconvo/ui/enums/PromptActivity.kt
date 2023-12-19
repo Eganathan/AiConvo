@@ -17,4 +17,8 @@ enum class PROMPT_ACTIVITY(val prompt: String, val routes: ROUTES) {
         "Give me a fun math problem with numeric answer in a json format like question=\$ answer=\$ explanation=\$",
         routes = ROUTES.MATH_CHALLENGE
     ),
+    TECH_AND_SCIENCE_NEWS(
+        "Give me 5 top and open source news related to each Tech and Science and i want it in a json like {\"news\": [{type: ,headline: , summary: , link: , imageLink:]}",
+        routes = ROUTES.TECH_NEWS
+    )
 }
