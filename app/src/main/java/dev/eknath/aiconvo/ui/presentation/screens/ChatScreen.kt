@@ -50,7 +50,7 @@ import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 @Composable
 internal fun ChatScreen(data: ScreenParams) {
 
-    val viewModel = remember{ConvoViewModel(data.generativeViewModel)}
+    val viewModel = remember{ConvoViewModel(data)}
     val chatContent by viewModel.covUiData.collectAsState()
     var promt by remember { mutableStateOf(TextFieldValue()) }
     val listState = rememberLazyListState()
@@ -71,7 +71,6 @@ internal fun ChatScreen(data: ScreenParams) {
             }
         } else {
             Row { ActivitiesOptions({ data.navController.navigate(route = it.routes.name) }) }
-
 
             Column(
                 modifier = Modifier.align(Alignment.Center),

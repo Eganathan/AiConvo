@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.generationConfig
 import dev.eknath.aiconvo.BuildConfig
 import dev.eknath.aiconvo.ui.enums.AI_MODELS
 import dev.eknath.aiconvo.ui.presentation.components.NetworkErrorDialog
@@ -24,6 +25,8 @@ enum class ROUTES {
 
 @Composable
 fun Application() {
+
+    //todo DI
     val generativeModel = remember {
         GenerativeModel(
             modelName = AI_MODELS.GEMINI_PRO.key,
@@ -31,10 +34,38 @@ fun Application() {
         )
     }
 
+    val imageGenerativeModel = remember {
+        GenerativeModel(
+            modelName = AI_MODELS.GEMINI_PRO_VISION.key,
+            apiKey = BuildConfig.apiKey
+        )
+    }
+
+    val extraCorrectnessModel = remember {
+        GenerativeModel(
+            modelName = AI_MODELS.GEMINI_PRO.key,
+            apiKey = BuildConfig.apiKey,
+            generationConfig = generationConfig {
+                temperature = 1f
+                topK = 1
+                topP = 1f
+                maxOutputTokens = 2048
+            }
+        )
+    }
+
+
     val isNetWorkAvailable = networkStateProvider()
 
     val navController = rememberNavController()
-    val parameters = remember { ScreenParams(navController = navController, generativeModel) }
+    val parameters = remember {
+        ScreenParams(
+            navController = navController,
+            generativeViewModel = generativeModel,
+            imageGenerativeModel = imageGenerativeModel,
+            extraCorrectnessModel = extraCorrectnessModel
+        )
+    }
 
     if (isNetWorkAvailable.value == NetworkState.Disconnected)
         NetworkErrorDialog()
@@ -43,7 +74,9 @@ fun Application() {
         composable(route = ROUTES.HOME.name, content = { HomeScreen(data = parameters) })
         composable(route = ROUTES.CHAT.name, content = { ChatScreen(data = parameters) })
         composable(route = ROUTES.RIDDLES.name, content = { RiddleScreen(data = parameters) })
-        composable(route = ROUTES.MATH_CHALLENGE.name, content = { MathChallengeScreen(data = parameters) })
+        composable(
+            route = ROUTES.MATH_CHALLENGE.name,
+            content = { MathChallengeScreen(data = parameters) })
         composable(route = ROUTES.TECH_NEWS.name, content = { NewsScreen(data = parameters) })
     }
 

@@ -5,12 +5,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.eknath.aiconvo.ui.enums.PROMPT_ACTIVITY
+import dev.eknath.aiconvo.ui.presentation.screens.ScreenParams
 import dev.eknath.aiconvo.ui.presentation.states.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,9 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ConvoViewModel(
-    private val generativeModel: GenerativeModel
-) : ViewModel() {
+class ConvoViewModel(val models: ScreenParams) : ViewModel() {
 
     //conversations
     private val _covUiData: MutableStateFlow<List<Conv>> = MutableStateFlow(emptyList())
@@ -39,7 +37,8 @@ class ConvoViewModel(
     val riddle = _riddle
 
     //news
-    private val _news: MutableStateFlow<ContentState<News?>> = MutableStateFlow(ContentState(null, state = UiState.Initial))
+    private val _news: MutableStateFlow<ContentState<News?>> =
+        MutableStateFlow(ContentState(null, state = UiState.Initial))
     val news: StateFlow<ContentState<News?>> = _news.asStateFlow()
 
     init {
@@ -143,7 +142,7 @@ class ConvoViewModel(
 
     private suspend fun prompt(input: String): GenerateContentResponse? {
         return try {
-            generativeModel.generateContent(input)
+            models.generativeViewModel.generateContent(input)
         } catch (e: Exception) {
             Log.e("Error", e.localizedMessage.orEmpty())
             null

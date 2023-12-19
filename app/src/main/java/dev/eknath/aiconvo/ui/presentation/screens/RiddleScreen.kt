@@ -55,13 +55,15 @@ import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 @Stable
 data class ScreenParams(
     val navController: NavController,
-    val generativeViewModel: GenerativeModel
+    val generativeViewModel: GenerativeModel,
+    val imageGenerativeModel: GenerativeModel,
+    val extraCorrectnessModel: GenerativeModel,
 )
 
 @Composable
 fun RiddleScreen(data: ScreenParams) {
 
-    val viewModel = remember { ConvoViewModel(data.generativeViewModel) }
+    val viewModel = remember { ConvoViewModel(data) }
 
     val context = LocalContext.current
     var score by remember { mutableIntStateOf(0) }

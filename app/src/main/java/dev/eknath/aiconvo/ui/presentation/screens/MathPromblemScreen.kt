@@ -30,7 +30,7 @@ import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 @Composable
 internal fun MathChallengeScreen(data: ScreenParams) {
 
-    val viewModel = remember { ConvoViewModel(data.generativeViewModel) }
+    val viewModel = remember { ConvoViewModel(data) }
     val challenge by viewModel.mathChallenge.collectAsState()
 
     Scaffold(topBar = {
