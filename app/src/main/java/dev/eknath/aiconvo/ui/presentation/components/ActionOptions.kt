@@ -44,7 +44,7 @@ fun ActivitiesOptions(onClickAction: (PROMPT_ACTIVITY) -> Unit) {
         listOf(
             PROMPT_ACTIVITY.RIDDLE,
             PROMPT_ACTIVITY.MATH_CHALLENGE,
-            PROMPT_ACTIVITY.TECH_AND_SCIENCE_NEWS
+            PROMPT_ACTIVITY.SUMMARIZE_ARTICLE
         ).forEach {
             Button(
                 onClick = { onClickAction(it) }) {

@@ -18,9 +18,10 @@ import dev.eknath.aiconvo.ui.presentation.screens.MathChallengeScreen
 import dev.eknath.aiconvo.ui.presentation.screens.NewsScreen
 import dev.eknath.aiconvo.ui.presentation.screens.RiddleScreen
 import dev.eknath.aiconvo.ui.presentation.screens.ScreenParams
+import dev.eknath.aiconvo.ui.presentation.screens.SummarizeArticle
 
 enum class ROUTES {
-    HOME, CHAT, RIDDLES, MATH_CHALLENGE, TECH_NEWS
+    HOME, CHAT, RIDDLES, MATH_CHALLENGE, TECH_NEWS, SUMMARIZE
 }
 
 @Composable
@@ -74,10 +75,9 @@ fun Application() {
         composable(route = ROUTES.HOME.name, content = { HomeScreen(data = parameters) })
         composable(route = ROUTES.CHAT.name, content = { ChatScreen(data = parameters) })
         composable(route = ROUTES.RIDDLES.name, content = { RiddleScreen(data = parameters) })
-        composable(
-            route = ROUTES.MATH_CHALLENGE.name,
-            content = { MathChallengeScreen(data = parameters) })
+        composable(route = ROUTES.MATH_CHALLENGE.name, content = { MathChallengeScreen(data = parameters) })
         composable(route = ROUTES.TECH_NEWS.name, content = { NewsScreen(data = parameters) })
+        composable(route = ROUTES.SUMMARIZE.name, content = { SummarizeArticle(data = parameters) })
     }
 
 

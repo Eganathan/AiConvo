@@ -71,7 +71,6 @@ internal fun ChatScreen(data: ScreenParams) {
             }
         } else {
             Row { ActivitiesOptions({ data.navController.navigate(route = it.routes.name) }) }
-
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -109,6 +108,7 @@ internal fun ChatScreen(data: ScreenParams) {
                         shape = RoundedCornerShape(5.dp)
                     )
             ) {
+
                 TextField(
                     enabled = chatContent.lastOrNull()?.state != UiState.Loading,
                     value = promt,

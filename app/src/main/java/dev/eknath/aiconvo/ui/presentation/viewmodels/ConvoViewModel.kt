@@ -36,6 +36,10 @@ class ConvoViewModel(val models: ScreenParams) : ViewModel() {
     private val _riddle: MutableState<RiddleData?> = mutableStateOf(null)
     val riddle = _riddle
 
+    //summary
+    private val _summary: MutableState<String?> = mutableStateOf(null)
+    val summary = _summary
+
     //news
     private val _news: MutableStateFlow<ContentState<News?>> =
         MutableStateFlow(ContentState(null, state = UiState.Initial))
@@ -137,6 +141,16 @@ class ConvoViewModel(val models: ScreenParams) : ViewModel() {
                 _news.update { it.copy(value = null, state = UiState.Error) }
                 Log.e("Test", "Failed")
             }
+        }
+    }
+
+    fun summarizeArticle(url: String) {
+        viewModelScope.launch {
+            Log.e("Test", "Loading")
+            _news.update { it.copy(state = UiState.Loading) }
+            val promptResponse = prompt(PROMPT_ACTIVITY.SUMMARIZE_ARTICLE.prompt.plus(url))
+            _summary.value = promptResponse?.text ?: "Sorry some error"
+
         }
     }
 
