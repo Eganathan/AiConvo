@@ -106,7 +106,8 @@ class ConvoViewModel(val models: ScreenParams) : ViewModel() {
 
     fun fetchARiddle() {
         viewModelScope.launch {
-            val riddleResponse = prompt(PROMPT_ACTIVITY.RIDDLE.prompt)
+            val riddleResponse =  models.extraCorrectnessModel.generateContent(PROMPT_ACTIVITY.RIDDLE.prompt)
+            Log.e("Test","${riddleResponse?.text}")
             _riddle.value = riddleData(riddleResponse?.text?.cleanJson().orEmpty())
             Log.e("Test", "Question: ${riddle.value?.question} Answer: ${riddle.value?.answer}")
         }

@@ -10,7 +10,7 @@ enum class PROMPT_ACTIVITY(val prompt: String, val routes: ROUTES) {
     FUNNY_JOCK("Share a funny clean jock", routes = ROUTES.HOME),
     TONGUE_TWISTER("give me a plain tongue twister", routes = ROUTES.HOME),
     RIDDLE(
-        "Give me a riddle with answer as a json format like question= and answer= but the answer should be a single word",
+        "Give me a riddle with answer as a json format like {\"question\":, \"answer\": } note the answer should be a single word",
         routes = ROUTES.RIDDLES
     ),
     MATH_CHALLENGE(
