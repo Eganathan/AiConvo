@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
@@ -36,7 +38,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import dev.eknath.aiconvo.R
+import dev.eknath.aiconvo.ui.presentation.ROUTES
 import dev.eknath.aiconvo.ui.presentation.helpers.openUrl
 import kotlinx.coroutines.launch
 
@@ -51,7 +55,7 @@ internal fun HomeScreen(data: ScreenParams) {
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier.fillMaxWidth(0.5f),
-                content = { DrawerContent() })
+                content = { DrawerContent(navController = data.navController) })
         },
     ) {
         Scaffold(
@@ -97,8 +101,9 @@ internal fun HomeScreen(data: ScreenParams) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DrawerContent() {
+private fun DrawerContent(navController: NavController) {
     val context = LocalContext.current
     Column(
         modifier = Modifier.fillMaxHeight(),
@@ -112,17 +117,41 @@ private fun DrawerContent() {
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .size(200.dp)
-                        .clickable { openUrl(context, "https:eknath.dev") }
                 )
                 Text(
                     text = "Your AI Companion :)",
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y = (-15).dp),
+                        .offset(y = (-15).dp)
+                        .clickable { openUrl(context, "https:eknath.dev") },
                 )
             }
-            Divider()
+
+            Divider(modifier = Modifier.padding(vertical = 5.dp))
+
+
+//            val currRoute = navController.visibleEntries.collectAsState().value
+//            val currentRoute by remember{ derivedStateOf { currRoute.firstOrNull()?.destination?.route.orEmpty() }}
+            Column {
+
+                ROUTES.entries.filter { it != ROUTES.CHAT && ROUTES.TECH_NEWS != it }.forEach {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultMinSize(minHeight = 40.dp)
+                            .padding(0.dp),
+                        onClick = { navController.navigate(it.name) }) {
+                        Text(
+                            text = it.name,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .offset(y = 10.dp)
+                        )
+                    }
+                }
+            }
         }
 
     }

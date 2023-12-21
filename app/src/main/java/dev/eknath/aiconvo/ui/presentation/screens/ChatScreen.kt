@@ -45,13 +45,11 @@ import dev.eknath.aiconvo.ui.presentation.components.ActivitiesOptions
 import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
 import dev.eknath.aiconvo.ui.presentation.components.QuoteCard
 import dev.eknath.aiconvo.ui.presentation.states.UiState
-import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 
 @Composable
 internal fun ChatScreen(data: ScreenParams) {
 
-    val viewModel = remember{ConvoViewModel(data.generativeViewModel)}
-    val chatContent by viewModel.covUiData.collectAsState()
+    val chatContent by data.viewModel.covUiData.collectAsState()
     var promt by remember { mutableStateOf(TextFieldValue()) }
     val listState = rememberLazyListState()
 
@@ -71,21 +69,19 @@ internal fun ChatScreen(data: ScreenParams) {
             }
         } else {
             Row { ActivitiesOptions({ data.navController.navigate(route = it.routes.name) }) }
-
-
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
                 QuoteCard( //todo add a share,reload and save options
-                    viewModel.techQuote.value?.quote,
-                    viewModel.techQuote.value?.author
+                    data.viewModel.techQuote.value?.quote,
+                    data.viewModel.techQuote.value?.author
                 )
 
                 Divider(modifier = Modifier.fillMaxWidth(0.6f))
                 Spacer(modifier = Modifier.height(25.dp))
-                Button(onClick = { viewModel.generateContent("Hello!") }) {
+                Button(onClick = { data.viewModel.generateContent("Hello!") }) {
                     Text(text = "Start with a Hello?")
                 }
 
@@ -110,6 +106,7 @@ internal fun ChatScreen(data: ScreenParams) {
                         shape = RoundedCornerShape(5.dp)
                     )
             ) {
+
                 TextField(
                     enabled = chatContent.lastOrNull()?.state != UiState.Loading,
                     value = promt,
@@ -123,7 +120,7 @@ internal fun ChatScreen(data: ScreenParams) {
                     ),
                     keyboardActions = KeyboardActions(onDone = {
                         if (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != UiState.Loading) {
-                            viewModel::generateContent.invoke(promt.text)
+                            data.viewModel::generateContent.invoke(promt.text)
                             promt = TextFieldValue()
                         }
                     }),
@@ -137,7 +134,7 @@ internal fun ChatScreen(data: ScreenParams) {
                                 shape = RoundedCornerShape(5.dp),
                                 enabled = (promt.text.isNotBlank() && chatContent.lastOrNull()?.state != UiState.Loading),
                                 onClick = {
-                                    viewModel::generateContent.invoke(promt.text)
+                                    data.viewModel::generateContent.invoke(promt.text)
                                     promt = TextFieldValue("")
 
                                 }
@@ -161,9 +158,9 @@ internal fun ChatScreen(data: ScreenParams) {
             listState.scrollToItem((chatContent.size))
         }
 
-        LaunchedEffect(key1 = viewModel.techQuote) {
-            if(viewModel.techQuote == null)
-                viewModel.techQuote
+        LaunchedEffect(key1 = data.viewModel.techQuote) {
+            if (data.viewModel.techQuote.value == null)
+                data.viewModel.techQuote
         }
     }
 }
