@@ -135,7 +135,7 @@ private fun DrawerContent(navController: NavController) {
 //            val currentRoute by remember{ derivedStateOf { currRoute.firstOrNull()?.destination?.route.orEmpty() }}
             Column {
 
-                ROUTES.entries.filter { it != ROUTES.HOME && ROUTES.TECH_NEWS != it }.forEach {
+                ROUTES.entries.filter { it != ROUTES.CHAT && ROUTES.TECH_NEWS != it }.forEach {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()

@@ -11,10 +11,12 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
 
 @Composable
 fun <T> TimerButton(
+    modifier: Modifier = Modifier,
     waitTime: Long = 1500,
     key: T,
     onClick: () -> Unit
@@ -24,6 +26,7 @@ fun <T> TimerButton(
     val waitTimeInString by remember { derivedStateOf { "" + (waitedTime / 100).toString() + " Sec" } }
 
     Button(
+        modifier = modifier,
         enabled = enabled,
         onClick = onClick
     ) {

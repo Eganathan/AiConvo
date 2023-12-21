@@ -44,7 +44,7 @@ class ConvoViewModel(
 
     //summary
     private val _summary: MutableStateFlow<ContentState<String?>> =
-        MutableStateFlow(ContentState(null))
+        MutableStateFlow(ContentState(null, state = UiState.Success))
     val summary = _summary
 
     //news
@@ -132,7 +132,7 @@ class ConvoViewModel(
 
     fun fetchMathChallenge() {
         viewModelScope.launch {
-            _mathChallenge.update { it.copy(state = UiState.Loading, data = null) }
+            _mathChallenge.update { it.copy(state = UiState.Loading) }
             val promptResponse = prompt(PROMPT_ACTIVITY.MATH_CHALLENGE.prompt)
             val data = mathChallengeData(promptResponse?.text?.cleanJson().orEmpty())
 
