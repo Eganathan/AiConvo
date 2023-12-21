@@ -1,5 +1,6 @@
 package dev.eknath.aiconvo.ui.presentation.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,13 +27,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
+import dev.eknath.aiconvo.ui.presentation.states.UiState
 
 @Composable
 fun SummarizeArticle(data: ScreenParams) {
-    val viewModel = remember { ConvoViewModel(data) }
     var input by remember { mutableStateOf(TextFieldValue()) }
-    val respo = viewModel.summary
+    val summary by  data.viewModel.summary.collectAsState()
 
 
     Scaffold(topBar = {
@@ -67,13 +68,13 @@ fun SummarizeArticle(data: ScreenParams) {
                 .fillMaxWidth()
                 .padding(10.dp)
                 .padding(horizontal = 5.dp),
-                onClick = { viewModel.summarizeArticle(input.text) }) {
+                onClick = {  data.viewModel.summarizeArticle(input.text) }) {
                 Text(text = "Summarize")
             }
 
             SelectionContainer {
                 Text(
-                    text = respo.value.orEmpty().toAnnotatedString(),
+                    text = summary.value?.toAnnotatedString() ?: AnnotatedString(""),
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
                         .verticalScroll(rememberScrollState()),
@@ -82,6 +83,11 @@ fun SummarizeArticle(data: ScreenParams) {
 
         }
     }
+
+    AnimatedVisibility(summary.state is UiState.Loading) {
+        LoadingDialog()
+    }
+
 }
 
 fun String.toAnnotatedString(): AnnotatedString {

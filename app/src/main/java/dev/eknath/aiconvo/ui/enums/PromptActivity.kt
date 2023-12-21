@@ -14,7 +14,7 @@ enum class PROMPT_ACTIVITY(val prompt: String, val routes: ROUTES) {
         routes = ROUTES.RIDDLES
     ),
     MATH_CHALLENGE(
-        "Give me a fun math problem with numeric answer in a json format like question=\$ answer=\$ explanation=\$",
+        "Give me a hard tricky math problem with numeric answer in a json format {\"question\":\$ \"answer\":\$ \"explanation\":\$}",
         routes = ROUTES.MATH_CHALLENGE
     ),
     TECH_AND_SCIENCE_NEWS(

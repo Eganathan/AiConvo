@@ -19,6 +19,7 @@ import dev.eknath.aiconvo.ui.presentation.screens.NewsScreen
 import dev.eknath.aiconvo.ui.presentation.screens.RiddleScreen
 import dev.eknath.aiconvo.ui.presentation.screens.ScreenParams
 import dev.eknath.aiconvo.ui.presentation.screens.SummarizeArticle
+import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 
 enum class ROUTES {
     HOME, CHAT, RIDDLES, MATH_CHALLENGE, TECH_NEWS, SUMMARIZE
@@ -62,9 +63,11 @@ fun Application() {
     val parameters = remember {
         ScreenParams(
             navController = navController,
-            generativeViewModel = generativeModel,
-            imageGenerativeModel = imageGenerativeModel,
-            extraCorrectnessModel = extraCorrectnessModel
+            viewModel = ConvoViewModel(
+                proModel = generativeModel,
+                visionModel = imageGenerativeModel,
+                correctnessModel = extraCorrectnessModel
+            )
         )
     }
 
@@ -75,7 +78,9 @@ fun Application() {
         composable(route = ROUTES.HOME.name, content = { HomeScreen(data = parameters) })
         composable(route = ROUTES.CHAT.name, content = { ChatScreen(data = parameters) })
         composable(route = ROUTES.RIDDLES.name, content = { RiddleScreen(data = parameters) })
-        composable(route = ROUTES.MATH_CHALLENGE.name, content = { MathChallengeScreen(data = parameters) })
+        composable(
+            route = ROUTES.MATH_CHALLENGE.name,
+            content = { MathChallengeScreen(data = parameters) })
         composable(route = ROUTES.TECH_NEWS.name, content = { NewsScreen(data = parameters) })
         composable(route = ROUTES.SUMMARIZE.name, content = { SummarizeArticle(data = parameters) })
     }

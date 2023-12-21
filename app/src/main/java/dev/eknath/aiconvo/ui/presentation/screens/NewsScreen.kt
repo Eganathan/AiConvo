@@ -18,21 +18,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import dev.eknath.aiconvo.ui.presentation.components.BubbleLoading
 import dev.eknath.aiconvo.ui.presentation.helpers.openUrl
 import dev.eknath.aiconvo.ui.presentation.states.UiState
-import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 
 
 @Composable
 internal fun NewsScreen(data: ScreenParams) {
 
-    val viewModel = remember { ConvoViewModel(data) }
-    val news by viewModel.news.collectAsState()
+    val news by  data.viewModel.news.collectAsState()
 
     Scaffold(topBar = {
         ActivityScreenTopBar(title = "Now in Tech and Science",
@@ -43,7 +40,7 @@ internal fun NewsScreen(data: ScreenParams) {
             when (news.state) {
                 UiState.Error -> Text(
                     text = "Error, click to try again",
-                    modifier = Modifier.clickable { viewModel.fetchNews() })
+                    modifier = Modifier.clickable {  data.viewModel.fetchNews() })
 
                 UiState.Loading -> BubbleLoading(visibility = true)
                 UiState.Initial -> BubbleLoading(visibility = true)
@@ -70,7 +67,7 @@ internal fun NewsScreen(data: ScreenParams) {
 
     LaunchedEffect(news.value) {
         if (news.value?.news.orEmpty().isEmpty() && news.state != UiState.Loading) {
-            viewModel.fetchNews()
+            data.viewModel.fetchNews()
             Log.e("Test", "Fired!")
         }
     }

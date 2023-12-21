@@ -1,6 +1,11 @@
 package dev.eknath.aiconvo.ui.presentation.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,8 +33,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,40 +48,34 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import com.google.ai.client.generativeai.GenerativeModel
+import dev.eknath.aiconvo.ui.presentation.components.ContentCard
 import dev.eknath.aiconvo.ui.presentation.components.DefaultBackButton
-import dev.eknath.aiconvo.ui.presentation.components.LoadingOrContentCard
 import dev.eknath.aiconvo.ui.presentation.components.RiddleInputField
 import dev.eknath.aiconvo.ui.presentation.components.TimerButton
 import dev.eknath.aiconvo.ui.presentation.helpers.shareNote
+import dev.eknath.aiconvo.ui.presentation.states.UiState
 import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
 
 
 @Stable
 data class ScreenParams(
     val navController: NavController,
-    val generativeViewModel: GenerativeModel,
-    val imageGenerativeModel: GenerativeModel,
-    val extraCorrectnessModel: GenerativeModel,
+    val viewModel: ConvoViewModel
 )
 
 @Composable
 fun RiddleScreen(data: ScreenParams) {
 
-    val viewModel = remember { ConvoViewModel(data) }
-
     val context = LocalContext.current
-    var score by remember { mutableIntStateOf(0) }
     var input = remember { mutableStateOf(TextFieldValue()) }
-    var riddle by remember { viewModel.riddle }
+    val riddle by data.viewModel.riddle.collectAsState()
     var revealAnswer by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
 
     val onSubmit = {
-        if (input.value.text.lowercase() == riddle?.answer?.lowercase()) {
-            score += 1
+        if (input.value.text.lowercase() == riddle.data?.answer?.lowercase()) {
             revealAnswer = false
-            viewModel.fetchARiddle()
+            data.viewModel.fetchARiddle()
             input.value = TextFieldValue()
         } else {
             error = true
@@ -92,138 +91,143 @@ fun RiddleScreen(data: ScreenParams) {
         }
     ) {
         Column(Modifier.padding(it)) {
-            Text(text = "Score: ${if (score == 0) "0" else score}")
-
-            LoadingOrContentCard(viewModel.riddle.value != null) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top,
+            ContentCard {
+                AnimatedVisibility(
+                    visible = (riddle.data?.question?.isBlank() == false && riddle.state is UiState.Success),
+                    enter = fadeIn() + scaleIn(tween(300)),
+                    exit = fadeOut() + scaleOut(tween(300))
                 ) {
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 25.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top,
                     ) {
-                        Text(
-                            text = "Question",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(5.dp)
-                                .padding(start = 5.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "${riddle?.question}",
-                                style = MaterialTheme.typography.headlineLarge,
-                                fontWeight = FontWeight.Bold
+                                text = "Question",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
                             )
-                            Row(
+                        }
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Column(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(end = 5.dp, bottom = 5.dp),
-                                horizontalArrangement = Arrangement.End
+                                    .padding(5.dp)
+                                    .padding(start = 5.dp)
                             ) {
-                                AnimatedVisibility(riddle != null) {
-                                    IconButton(
-                                        modifier = Modifier.size(23.dp),
-                                        onClick = {
-                                            context.shareNote(
-                                                title = "Check out this Riddle: ",
-                                                content = riddle?.question.orEmpty()
+                                Text(
+                                    text = "${riddle.data?.question}",
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(end = 5.dp, bottom = 5.dp),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    AnimatedVisibility(riddle.data != null) {
+                                        IconButton(
+                                            modifier = Modifier.size(23.dp),
+                                            onClick = {
+                                                context.shareNote(
+                                                    title = "Check out this Riddle: ",
+                                                    content = riddle.data?.question.orEmpty()
+                                                )
+                                            }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Share,
+                                                contentDescription = ""
                                             )
-                                        }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Share,
-                                            contentDescription = ""
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Divider(
+                            thickness = 5.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .fillMaxWidth(0.1f)
+                                .clip(RoundedCornerShape(5.dp))
+                        )
+
+                        AnimatedVisibility(visible = revealAnswer) {
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Text(
+                                        text = "Answer",
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(5.dp)
+                                            .padding(start = 5.dp)
+                                    ) {
+                                        Text(
+                                            text = "${riddle.data?.answer}",
+                                            style = MaterialTheme.typography.headlineLarge,
+                                            fontWeight = FontWeight.Bold,
                                         )
                                     }
                                 }
                             }
                         }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Divider(
-                        thickness = 5.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .fillMaxWidth(0.1f)
-                            .clip(RoundedCornerShape(5.dp))
-                    )
 
-                    AnimatedVisibility(visible = revealAnswer) {
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Text(
-                                    text = "Answer",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .padding(5.dp)
-                                        .padding(start = 5.dp)
-                                ) {
-                                    Text(
-                                        text = "${riddle?.answer}",
-                                        style = MaterialTheme.typography.headlineLarge,
-                                        fontWeight = FontWeight.Bold,
-                                    )
-                                }
-                            }
-                        }
-                    }
+                        Spacer(modifier = Modifier.height(25.dp))
+                        RiddleInputField(
+                            otpText = input,
+                            otpCount = riddle.data?.answer?.length ?: 6,
+                            onOtpTextChange = { input.value = it },
+                            error = false
+                        )
 
-                    Spacer(modifier = Modifier.height(25.dp))
-                    RiddleInputField(
-                        otpText = input,
-                        otpCount = riddle?.answer?.length ?: 6,
-                        onOtpTextChange = { input.value = it },
-                        error = false
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 25.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        TimerButton(key = riddle, onClick = { revealAnswer = true })
-                        Button(
-                            enabled = input.value.text.isNotBlank(),
-                            onClick = onSubmit
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 25.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = "Submit")
+                            TimerButton(key = riddle, onClick = { revealAnswer = true })
+                            Button(
+                                enabled = input.value.text.isNotBlank(),
+                                onClick = onSubmit
+                            ) {
+                                Text(text = "Submit")
+                            }
                         }
-                    }
 
 
-                    Button(onClick = {
-                        revealAnswer = false
-                        riddle = null
-                        input.value = TextFieldValue()
-                        viewModel.fetchARiddle()
-                    }) {
-                        if (revealAnswer)
-                            Text(text = "Next")
-                        else
-                            Text(text = "Skip")
+                        Button(
+                            onClick = {
+                                revealAnswer = false
+                                input.value = TextFieldValue()
+                                data.viewModel.fetchARiddle()
+                            }) {
+                            if (revealAnswer)
+                                Text(text = "Next")
+                            else
+                                Text(text = "Skip")
+                        }
                     }
                 }
             }
@@ -255,12 +259,14 @@ fun RiddleScreen(data: ScreenParams) {
         }
     }
 
-
-    LaunchedEffect(key1 = riddle) {
-        if (riddle == null)
-            viewModel.fetchARiddle()
+    AnimatedVisibility(riddle.state is UiState.Loading) {
+        LoadingDialog()
     }
 
+    LaunchedEffect(key1 = riddle) {
+        if (riddle.data == null && riddle.state !is UiState.Loading)
+            data.viewModel.fetchARiddle()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -37,3 +37,23 @@ fun LoadingOrContentCard(isLoading: Boolean, content: @Composable () -> Unit) {
         }
     }
 }
+
+@Composable
+fun ContentCard(content: @Composable () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 50.dp)
+            .padding(horizontal = 25.dp)
+            .wrapContentSize(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier.padding(5.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            content()
+        }
+    }
+}

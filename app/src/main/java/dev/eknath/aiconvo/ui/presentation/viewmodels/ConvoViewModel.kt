@@ -5,12 +5,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dev.eknath.aiconvo.ui.enums.PROMPT_ACTIVITY
-import dev.eknath.aiconvo.ui.presentation.screens.ScreenParams
 import dev.eknath.aiconvo.ui.presentation.states.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +18,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ConvoViewModel(val models: ScreenParams) : ViewModel() {
+class ConvoViewModel(
+    val proModel: GenerativeModel,
+    val visionModel: GenerativeModel,
+    val correctnessModel: GenerativeModel
+) : ViewModel() {
 
     //conversations
     private val _covUiData: MutableStateFlow<List<Conv>> = MutableStateFlow(emptyList())
@@ -29,15 +33,18 @@ class ConvoViewModel(val models: ScreenParams) : ViewModel() {
     val techQuote = _quote
 
     //currentQuote
-    private val _mathChallenge: MutableStateFlow<MathChallenge?> = MutableStateFlow(null)
+    private val _mathChallenge: MutableStateFlow<Content<MathChallenge?>> =
+        MutableStateFlow(Content(data = null))
     val mathChallenge = _mathChallenge.asStateFlow()
 
     //currentRiddle
-    private val _riddle: MutableState<RiddleData?> = mutableStateOf(null)
+    private val _riddle: MutableStateFlow<Content<RiddleData?>> =
+        MutableStateFlow(Content(data = null))
     val riddle = _riddle
 
     //summary
-    private val _summary: MutableState<String?> = mutableStateOf(null)
+    private val _summary: MutableStateFlow<ContentState<String?>> =
+        MutableStateFlow(ContentState(null))
     val summary = _summary
 
     //news
@@ -106,30 +113,44 @@ class ConvoViewModel(val models: ScreenParams) : ViewModel() {
 
     fun fetchARiddle() {
         viewModelScope.launch {
-            val riddleResponse =  models.extraCorrectnessModel.generateContent(PROMPT_ACTIVITY.RIDDLE.prompt)
-            Log.e("Test","${riddleResponse?.text}")
-            _riddle.value = riddleData(riddleResponse?.text?.cleanJson().orEmpty())
-            Log.e("Test", "Question: ${riddle.value?.question} Answer: ${riddle.value?.answer}")
+            _riddle.update { it.copy(state = UiState.Loading) }
+
+            val riddleResponse = correctnessModel.generateContent(PROMPT_ACTIVITY.RIDDLE.prompt)
+            val response = riddleData(riddleResponse.text?.cleanJson().orEmpty())
+            _riddle.update {
+                it.copy(
+                    data = response,
+                    state = if (response == null) UiState.Error else UiState.Success
+                )
+            }
+            Log.e(
+                "Test",
+                "Question: ${riddle.value.data?.question} Answer: ${riddle.value?.data?.answer}"
+            )
         }
     }
 
     fun fetchMathChallenge() {
         viewModelScope.launch {
+            _mathChallenge.update { it.copy(state = UiState.Loading, data = null) }
             val promptResponse = prompt(PROMPT_ACTIVITY.MATH_CHALLENGE.prompt)
-            _mathChallenge.update { mathChallengeData(promptResponse?.text?.cleanJson().orEmpty()) }
+            val data = mathChallengeData(promptResponse?.text?.cleanJson().orEmpty())
+
+            _mathChallenge.update {
+                it.copy(
+                    data = data,
+                    state = if (data != null) UiState.Success else UiState.Error
+                )
+            }
             Log.e(
                 "Test",
-                "MATH RES:${promptResponse?.text} feedback: ${promptResponse?.promptFeedback}"
-            )
-            Log.e(
-                "Test",
-                "MATH:  Question: ${mathChallenge.value?.question} Answer: ${mathChallenge.value?.answer} EXP: ${mathChallenge.value?.explanation}"
+                "MATH:  Question: ${mathChallenge.value?.data?.question} Answer: ${mathChallenge.value?.data?.answer} EXP: ${mathChallenge.value?.data?.explanation}"
             )
         }
     }
 
     fun fetchNews() {
-        viewModelScope.launch {
+        /*viewModelScope.launch {
             Log.e("Test", "Loading")
             _news.update { it.copy(state = UiState.Loading) }
             val promptResponse = prompt(PROMPT_ACTIVITY.TECH_AND_SCIENCE_NEWS.prompt)
@@ -142,22 +163,27 @@ class ConvoViewModel(val models: ScreenParams) : ViewModel() {
                 _news.update { it.copy(value = null, state = UiState.Error) }
                 Log.e("Test", "Failed")
             }
-        }
+        }*/
     }
 
     fun summarizeArticle(url: String) {
         viewModelScope.launch {
-            Log.e("Test", "Loading")
-            _news.update { it.copy(state = UiState.Loading) }
+            _summary.update { it.copy(state = UiState.Loading, value = null) }
             val promptResponse = prompt(PROMPT_ACTIVITY.SUMMARIZE_ARTICLE.prompt.plus(url))
-            _summary.value = promptResponse?.text ?: "Sorry some error"
+            _summary.update {
+                it.copy(
+                    value = promptResponse?.text,
+                    state = if (promptResponse?.text?.isNotBlank() == true) UiState.Success else UiState.Error
+                )
+
+            }
 
         }
     }
 
     private suspend fun prompt(input: String): GenerateContentResponse? {
         return try {
-            models.generativeViewModel.generateContent(input)
+            proModel.generateContent(input)
         } catch (e: Exception) {
             Log.e("Error", e.localizedMessage.orEmpty())
             null
@@ -165,6 +191,11 @@ class ConvoViewModel(val models: ScreenParams) : ViewModel() {
     }
 
 }
+
+data class Content<T>(
+    val data: T,
+    val state: UiState = UiState.Initial
+)
 
 //datas
 class Conv(

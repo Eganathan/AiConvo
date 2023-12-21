@@ -15,7 +15,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun <T> TimerButton(
-    waitTime: Long = 3000,
+    waitTime: Long = 1500,
     key: T,
     onClick: () -> Unit
 ) {
@@ -29,7 +29,7 @@ fun <T> TimerButton(
     ) {
         if (!enabled)
             Row {
-                Text(text = waitTimeInString)
+                Text(text = "Answer in $waitTimeInString Sec")
             }
         else
             Text(text = "Answer")
