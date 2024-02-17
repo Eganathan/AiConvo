@@ -1,17 +1,24 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+
 package dev.eknath.aiconvo.ui.presentation.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
@@ -31,6 +38,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.eknath.aiconvo.R
+import dev.eknath.aiconvo.ui.enums.PROMPT_ACTIVITY
 import dev.eknath.aiconvo.ui.presentation.ROUTES
 import dev.eknath.aiconvo.ui.presentation.helpers.openUrl
 import kotlinx.coroutines.launch
@@ -157,3 +166,52 @@ private fun DrawerContent(navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen() {
+    LazyColumn {
+        items(PROMPT_ACTIVITY.entries) {
+            HomeListItem(it.title, onRight = (it.ordinal % 2 > 0), {})
+        }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+fun HomeListItem(/*icon: ImageVector,*/ title: String, onRight: Boolean, onClick: () -> Unit) {
+    val defaultMinHeight = 100.dp
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 20.dp, vertical = 5.dp)
+            .height(defaultMinHeight)
+            .fillMaxWidth(),
+        onClick = { /*TODO*/ }) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(defaultMinHeight)
+                    .aspectRatio(1f)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Image(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = "",
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(defaultMinHeight / 2)
+                        .align(Alignment.Center)
+                )
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.offset(y = 30.dp, x = 15.dp),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}

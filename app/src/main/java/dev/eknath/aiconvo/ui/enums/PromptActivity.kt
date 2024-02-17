@@ -29,5 +29,13 @@ enum class PROMPT_ACTIVITY(val prompt: String, val routes: ROUTES) {
         "Can you give me a analytical aptitude test with 4 options for example { \"exam\":[{\"question\":  \"options\":[{\"option_id\":  \"option\":}], \"answer\":  \"explanation\":}]}",
         routes = ROUTES.HOME
     ),
-    SUMMARIZE_ARTICLE("Can you summarize this article for me ", routes = ROUTES.SUMMARIZE)
+    SUMMARIZE_ARTICLE("Can you summarize this article for me ", routes = ROUTES.SUMMARIZE);
+
+
+    val title: String
+        get() = when (this) {
+            RIDDLE -> "Riddle"
+            MATH_CHALLENGE -> "Math"
+            else -> "Chat"
+        }
 }
