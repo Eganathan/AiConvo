@@ -2,6 +2,7 @@ package dev.eknath.aiconvo.ui.presentation.helpers
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +13,7 @@ import androidx.compose.runtime.remember
 import java.util.Locale
 
 @Composable
-fun rememberTTS(context: Context): State<TextToSpeech?> {
+fun rememberTTS(context: Context, enableMaleVoice: Boolean = true): State<TextToSpeech?> {
     val textToSpeechService: MutableState<TextToSpeech?> = remember { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
@@ -21,6 +22,20 @@ fun rememberTTS(context: Context): State<TextToSpeech?> {
         ) { tStatus ->
             if (tStatus == TextToSpeech.SUCCESS) {
                 textToSpeechService.value?.language = Locale.getDefault()
+
+                //TODO let user select the voices as per their wishes
+                if (enableMaleVoice) {
+                    val availableVoices =
+                        textToSpeechService.value?.voices?.filter { it.locale == Locale.getDefault() }
+                    // Find a suitable male voice (modify the conditions as needed)
+                    availableVoices?.forEach {  Log.e("TTS",it.toString())}
+                    val maleVoice =
+                        availableVoices?.find { it.name.contains("en-us-x-iom-local", ignoreCase = true) }
+                    // If a male voice is found, attempt to set it
+                    maleVoice?.let { textToSpeechService.value?.setVoice(it) }
+
+                }
+
             }
         }
     }
