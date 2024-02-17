@@ -22,7 +22,7 @@ enum class PROMPT_ACTIVITY(val prompt: String, val routes: ROUTES) {
         routes = ROUTES.TECH_NEWS
     ),
     LOGICAl_APPTITUDE(
-        "Can you give me a logical aptitude test with 4 options for example { \"exam\":[{\"question\":  \"options\":[{\"option_id\":  \"option\":}], \"answer\":  \"explanation\":}]}",
+        "Can you give me a logical aptitude test with 4 options for example { \"exam\":[{\"question\":  \"options\":[{\"option_id\":  \"option\":}], \"answer_option_id\":  \"explanation\":}]}",
         routes = ROUTES.HOME
     ),
     ANALYTICAL_APPTITUDE(
