@@ -2,6 +2,7 @@
 
 package dev.eknath.aiconvo.ui.presentation.screens
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -103,7 +104,8 @@ internal fun HomeScreen(data: ScreenParams) {
             }
         ) {
             Box(modifier = Modifier.padding(it)) {
-                ChatScreen(data)
+//                ChatScreen(data)
+                MainScreen()
             }
         }
     }
@@ -171,14 +173,14 @@ private fun DrawerContent(navController: NavController) {
 fun MainScreen() {
     LazyColumn {
         items(PROMPT_ACTIVITY.entries) {
-            HomeListItem(it.title, onRight = (it.ordinal % 2 > 0), {})
+            HomeListItem(title = it.title, icon = it.iconRes, onClick = {})
         }
     }
 }
 
 @ExperimentalMaterial3Api
 @Composable
-fun HomeListItem(/*icon: ImageVector,*/ title: String, onRight: Boolean, onClick: () -> Unit) {
+fun HomeListItem(@DrawableRes icon: Int, title: String, onClick: () -> Unit) {
     val defaultMinHeight = 100.dp
     Card(
         modifier = Modifier
@@ -197,7 +199,7 @@ fun HomeListItem(/*icon: ImageVector,*/ title: String, onRight: Boolean, onClick
                     .background(MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Image(
-                    imageVector = Icons.Filled.Settings,
+                    painter = painterResource(id = icon),
                     contentDescription = "",
                     alignment = Alignment.Center,
                     modifier = Modifier
