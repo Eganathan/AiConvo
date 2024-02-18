@@ -28,6 +28,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,9 +41,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import dev.eknath.aiconvo.ui.presentation.components.ConversationContentUI
 import dev.eknath.aiconvo.ui.presentation.components.QuoteCard
 import dev.eknath.aiconvo.ui.presentation.states.UiState
+import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
+
+//TODO("Remove this Screen Params")
+@Stable
+data class ScreenParams(val navController: NavController, val viewModel: ConvoViewModel)
 
 @Composable
 internal fun ChatScreen(data: ScreenParams) {

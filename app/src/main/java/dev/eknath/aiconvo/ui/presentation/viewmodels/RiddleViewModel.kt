@@ -2,6 +2,7 @@ package dev.eknath.aiconvo.ui.presentation.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import com.squareup.moshi.Moshi
@@ -46,7 +47,7 @@ class RiddleViewModel(private val generativeModel: GenerativeModel) : ViewModel(
             }
             Log.e(
                 "Test",
-                "Question: ${riddle.value.data?.question} Answer: ${riddle.value?.data?.answer}"
+                "Question: ${riddle.value.data?.question} Answer: ${riddle.value.data?.answer}"
             )
         }
     }
@@ -62,5 +63,15 @@ internal fun riddleData(input: String): RiddleData? {
         adapter.fromJson(input)
     } catch (e: Exception) {
         null
+    }
+}
+
+class RiddleViewModelFactory(private val generativeModel: GenerativeModel) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(RiddleViewModel::class.java)) {
+            return RiddleViewModel(generativeModel) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

@@ -60,29 +60,26 @@ import dev.eknath.aiconvo.ui.presentation.helpers.shareNote
 import dev.eknath.aiconvo.ui.presentation.helpers.speak
 import dev.eknath.aiconvo.ui.presentation.states.UiState
 import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
+import dev.eknath.aiconvo.ui.presentation.viewmodels.RiddleViewModel
 
 
-@Stable
-data class ScreenParams(
-    val navController: NavController,
-    val viewModel: ConvoViewModel
-)
+
 
 @Composable
-fun RiddleScreen(data: ScreenParams) {
+fun RiddleScreen(navController: NavController, viewModel: RiddleViewModel) {
 
     val context = LocalContext.current
     val tts = rememberTTS(context = context)
 
     var input = remember { mutableStateOf(TextFieldValue()) }
-    val riddle by data.viewModel.riddle.collectAsState()
+    val riddle by viewModel.riddle.collectAsState()
     var revealAnswer by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
 
     val onSubmit = {
         if (input.value.text.lowercase() == riddle.data?.answer?.lowercase()) {
             revealAnswer = false
-            data.viewModel.fetchARiddle()
+            viewModel.fetchARiddle()
             input.value = TextFieldValue()
         } else {
             error = true
@@ -95,7 +92,7 @@ fun RiddleScreen(data: ScreenParams) {
             ActivityScreenTopBar(
                 title = "Riddle",
                 enabled = true,
-                onBackPressed = { data.navController.navigateUp() })
+                onBackPressed = { navController.navigateUp() })
         }
     ) {
         Column(Modifier.padding(it)) {
@@ -246,7 +243,7 @@ fun RiddleScreen(data: ScreenParams) {
                             onClick = {
                                 revealAnswer = false
                                 input.value = TextFieldValue()
-                                data.viewModel.fetchARiddle()
+                                viewModel.fetchARiddle()
                             }) {
                             if (revealAnswer)
                                 Text(text = "Next")
@@ -290,7 +287,7 @@ fun RiddleScreen(data: ScreenParams) {
 
     LaunchedEffect(key1 = riddle) {
         if (riddle.data == null && riddle.state !is UiState.Loading)
-            data.viewModel.fetchARiddle()
+            viewModel.fetchARiddle()
     }
 }
 
