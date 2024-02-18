@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -105,7 +106,7 @@ internal fun HomeScreen(data: ScreenParams) {
         ) {
             Box(modifier = Modifier.padding(it)) {
 //                ChatScreen(data)
-                MainScreen()
+                MainScreen(navController = data.navController)
             }
         }
     }
@@ -170,10 +171,44 @@ private fun DrawerContent(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
-    LazyColumn {
-        items(PROMPT_ACTIVITY.entries) {
-            HomeListItem(title = it.title, icon = it.iconRes, onClick = {})
+fun MainScreen(navController: NavController) {
+    Column {
+        LazyColumn {
+
+            /*item {
+                Card(
+                    modifier = Modifier
+                        .defaultMinSize(minHeight = 250.dp)
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Red)
+                ) {
+                    Text(text = "Some Quote")
+                }
+            }*/
+
+            items(PROMPT_ACTIVITY.entries) {
+                HomeListItem(title = it.title, icon = it.iconRes,
+                    onClick = {
+                        navController.navigate(route = it.routes.name)
+                    })
+            }
+
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.divider),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .height(20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(70.dp))
+                }
+            }
         }
     }
 }
@@ -187,7 +222,8 @@ fun HomeListItem(@DrawableRes icon: Int, title: String, onClick: () -> Unit) {
             .padding(horizontal = 20.dp, vertical = 5.dp)
             .height(defaultMinHeight)
             .fillMaxWidth(),
-        onClick = { /*TODO*/ }) {
+        onClick = onClick
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
