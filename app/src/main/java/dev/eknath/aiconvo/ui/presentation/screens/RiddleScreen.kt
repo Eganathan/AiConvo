@@ -1,5 +1,6 @@
 package dev.eknath.aiconvo.ui.presentation.screens
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -42,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -52,42 +55,44 @@ import dev.eknath.aiconvo.ui.presentation.components.ContentCard
 import dev.eknath.aiconvo.ui.presentation.components.DefaultBackButton
 import dev.eknath.aiconvo.ui.presentation.components.RiddleInputField
 import dev.eknath.aiconvo.ui.presentation.components.TimerButton
+import dev.eknath.aiconvo.ui.presentation.helpers.rememberTTS
 import dev.eknath.aiconvo.ui.presentation.helpers.shareNote
+import dev.eknath.aiconvo.ui.presentation.helpers.speak
 import dev.eknath.aiconvo.ui.presentation.states.UiState
 import dev.eknath.aiconvo.ui.presentation.viewmodels.ConvoViewModel
+import dev.eknath.aiconvo.ui.presentation.viewmodels.RiddleViewModel
 
 
-@Stable
-data class ScreenParams(
-    val navController: NavController,
-    val viewModel: ConvoViewModel
-)
+
 
 @Composable
-fun RiddleScreen(data: ScreenParams) {
+fun RiddleScreen(navController: NavController, viewModel: RiddleViewModel) {
 
     val context = LocalContext.current
+    val tts = rememberTTS(context = context)
+
     var input = remember { mutableStateOf(TextFieldValue()) }
-    val riddle by data.viewModel.riddle.collectAsState()
+    val riddle by viewModel.riddle.collectAsState()
     var revealAnswer by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
 
     val onSubmit = {
         if (input.value.text.lowercase() == riddle.data?.answer?.lowercase()) {
             revealAnswer = false
-            data.viewModel.fetchARiddle()
+            viewModel.fetchARiddle()
             input.value = TextFieldValue()
         } else {
             error = true
             input.value = TextFieldValue()
         }
     }
+
     Scaffold(
         topBar = {
             ActivityScreenTopBar(
                 title = "Riddle",
                 enabled = true,
-                onBackPressed = { data.navController.navigateUp() })
+                onBackPressed = { navController.navigateUp() })
         }
     ) {
         Column(Modifier.padding(it)) {
@@ -135,6 +140,23 @@ fun RiddleScreen(data: ScreenParams) {
                                         .padding(end = 5.dp, bottom = 5.dp),
                                     horizontalArrangement = Arrangement.End
                                 ) {
+
+                                    AnimatedVisibility(riddle.data != null) {
+                                        IconButton(
+                                            modifier = Modifier.size(23.dp),
+                                            onClick = {
+                                                tts.speak(
+                                                    riddle.data?.question
+                                                        ?: "Sorry,Some Error Occurred!"
+                                                )
+                                            }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.PlayArrow,
+                                                contentDescription = ""
+                                            )
+                                        }
+                                    }
+
                                     AnimatedVisibility(riddle.data != null) {
                                         IconButton(
                                             modifier = Modifier.size(23.dp),
@@ -221,7 +243,7 @@ fun RiddleScreen(data: ScreenParams) {
                             onClick = {
                                 revealAnswer = false
                                 input.value = TextFieldValue()
-                                data.viewModel.fetchARiddle()
+                                viewModel.fetchARiddle()
                             }) {
                             if (revealAnswer)
                                 Text(text = "Next")
@@ -265,7 +287,7 @@ fun RiddleScreen(data: ScreenParams) {
 
     LaunchedEffect(key1 = riddle) {
         if (riddle.data == null && riddle.state !is UiState.Loading)
-            data.viewModel.fetchARiddle()
+            viewModel.fetchARiddle()
     }
 }
 
@@ -280,3 +302,19 @@ fun ActivityScreenTopBar(title: String, enabled: Boolean = true, onBackPressed: 
         },
     )
 }
+
+@Composable
+fun AnimatedIconButton(visibility: Boolean, onClick: () -> Unit, @DrawableRes iconRes: Int) {
+    AnimatedVisibility(visibility) {
+        IconButton(
+            modifier = Modifier.size(23.dp),
+            onClick = onClick
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = ""
+            )
+        }
+    }
+}
+

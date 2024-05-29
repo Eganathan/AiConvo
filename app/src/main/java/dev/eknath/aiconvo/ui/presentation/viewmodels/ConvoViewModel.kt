@@ -10,6 +10,9 @@ import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import dev.eknath.aiconvo.ui.data.models.MathChallenge
+import dev.eknath.aiconvo.ui.data.models.QuoteData
+import dev.eknath.aiconvo.ui.data.models.RiddleData
 import dev.eknath.aiconvo.ui.enums.PROMPT_ACTIVITY
 import dev.eknath.aiconvo.ui.presentation.states.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -213,15 +216,7 @@ fun String.cleanJson(): String {
 }
 
 
-@JsonClass(generateAdapter = true)
-data class QuoteData(val quote: String, val author: String)
 
-@JsonClass(generateAdapter = true)
-data class RiddleData(val question: String, val answer: String)
-
-
-@JsonClass(generateAdapter = true)
-data class MathChallenge(val question: String, val answer: String, val explanation: String)
 
 @JsonClass(generateAdapter = true)
 data class NewsItem(
@@ -250,20 +245,6 @@ fun techQuote(input: String): QuoteData? {
 }
 
 
-fun riddleData(input: String): RiddleData? {
-    val moshi: Moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
-
-    val adapter = moshi.adapter(RiddleData::class.java)
-    return try {
-        adapter.fromJson(input)
-    } catch (e: Exception) {
-        null
-    }
-}
-
-
 fun mathChallengeData(input: String): MathChallenge? {
     val moshi: Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -273,22 +254,6 @@ fun mathChallengeData(input: String): MathChallenge? {
     return try {
         adapter.fromJson(input)
     } catch (e: Exception) {
-        null
-    }
-}
-
-
-fun newsData(input: String): News? {
-    val moshi: Moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
-
-    val adapter = moshi.adapter(News::class.java)
-    return try {
-        Log.e("Test", "INPUT:$input")
-        adapter.fromJson(input)
-    } catch (e: Exception) {
-        Log.e("Test", "${e.message}")
         null
     }
 }
