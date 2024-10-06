@@ -84,8 +84,7 @@ fun Application() {
         composable(route = ROUTES.RIDDLES.name, content = {
             //Riddle ViewModel
             val factory = RiddleViewModelFactory(generativeModel)
-            val riddleViewModel =
-                viewModel(modelClass = RiddleViewModel::class.java, factory = factory)
+            val riddleViewModel = viewModel(modelClass = RiddleViewModel::class.java, factory = factory)
 
             RiddleScreen(navController = navController, viewModel = riddleViewModel)
         })
