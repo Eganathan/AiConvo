@@ -19,7 +19,7 @@ fun Application(modifier: Modifier = Modifier) {
 
     val showDialog = remember { derivedStateOf { apiKey.value.length < 25 } }
 
-    if (showDialog.value)
+    if (showDialog.value) {
         APIKeyDialog(
             showDialog = true,
             onDismiss = {},
@@ -28,7 +28,8 @@ fun Application(modifier: Modifier = Modifier) {
                 context.setApiKey(apiKey.value)
             }
         )
-    else
+        AppNavigation(apiKey.value)
+    } else
         AppNavigation(apiKey.value)
 }
 
