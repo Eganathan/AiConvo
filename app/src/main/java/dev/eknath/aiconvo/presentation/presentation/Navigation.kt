@@ -8,7 +8,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.generationConfig
-import dev.eknath.aiconvo.BuildConfig
 import dev.eknath.aiconvo.presentation.enums.AI_MODELS
 import dev.eknath.aiconvo.presentation.presentation.components.NetworkErrorDialog
 import dev.eknath.aiconvo.presentation.presentation.helpers.NetworkState
@@ -29,27 +28,27 @@ enum class ROUTES {
 }
 
 @Composable
-fun Application() {
+fun AppNavigation(apiKey: String) {
 
     //todo DI
     val generativeModel = remember {
         GenerativeModel(
             modelName = AI_MODELS.GEMINI_PRO.key,
-            apiKey = BuildConfig.apiKey
+            apiKey = apiKey
         )
     }
 
     val imageGenerativeModel = remember {
         GenerativeModel(
             modelName = AI_MODELS.GEMINI_PRO_VISION.key,
-            apiKey = BuildConfig.apiKey
+            apiKey = apiKey
         )
     }
 
     val extraCorrectnessModel = remember {
         GenerativeModel(
             modelName = AI_MODELS.GEMINI_PRO.key,
-            apiKey = BuildConfig.apiKey,
+            apiKey = apiKey,
             generationConfig = generationConfig {
                 temperature = 1f
                 topK = 1
@@ -84,7 +83,8 @@ fun Application() {
         composable(route = ROUTES.RIDDLES.name, content = {
             //Riddle ViewModel
             val factory = RiddleViewModelFactory(generativeModel)
-            val riddleViewModel = viewModel(modelClass = RiddleViewModel::class.java, factory = factory)
+            val riddleViewModel =
+                viewModel(modelClass = RiddleViewModel::class.java, factory = factory)
 
             RiddleScreen(navController = navController, viewModel = riddleViewModel)
         })
@@ -94,6 +94,5 @@ fun Application() {
         composable(route = ROUTES.TECH_NEWS.name, content = { NewsScreen(data = parameters) })
         composable(route = ROUTES.SUMMARIZE.name, content = { SummarizeArticle(data = parameters) })
     }
-
 
 }
