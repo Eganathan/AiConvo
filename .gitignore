@@ -17,9 +17,3 @@ build/kotlin/
 .cxx
 local.properties
 /gradle/wrapper
-/app/libs/
-/app/src/main/res/font/
-/app/release/
-*.keystore
-app/src/main/java/com/marudham/farmmanagement/ui/previews
-.qlty/
