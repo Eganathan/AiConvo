@@ -9,7 +9,6 @@ import android.content.SharedPreferences
 private object PreferenceKeys {
     const val prefName = "aiConvoPref"
     const val apiKeyPref = "_userApiKey"
-
     const val defaultValue = "default_value"
 }
 
