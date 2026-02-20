@@ -14,7 +14,7 @@ import dev.eknath.aiconvo.util.setApiKey
 fun Application(modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
-    val prefApiKey = (context.getApiKeyOrDefault() ?: BuildConfig.apiKey)
+    val prefApiKey = (context.getApiKeyOrDefault() ?: "NO_KEY")
     val apiKey = remember { mutableStateOf(prefApiKey) }
 
     val showDialog = remember { derivedStateOf { apiKey.value.length < 25 } }

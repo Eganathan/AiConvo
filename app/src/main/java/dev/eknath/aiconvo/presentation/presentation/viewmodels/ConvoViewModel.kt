@@ -5,8 +5,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -14,6 +12,7 @@ import dev.eknath.aiconvo.presentation.data.models.MathChallenge
 import dev.eknath.aiconvo.presentation.data.models.QuoteData
 import dev.eknath.aiconvo.presentation.data.models.RiddleData
 import dev.eknath.aiconvo.presentation.enums.PROMPT_ACTIVITY
+import dev.eknath.aiconvo.presentation.presentation.KoogHelper
 import dev.eknath.aiconvo.presentation.presentation.states.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,9 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ConvoViewModel(
-    val proModel: GenerativeModel,
-    val visionModel: GenerativeModel,
-    val correctnessModel: GenerativeModel
+    private val koogHelper: KoogHelper
 ) : ViewModel() {
 
     //conversations
@@ -73,8 +70,8 @@ class ConvoViewModel(
 
         viewModelScope.launch {
             try {
-                val response = prompt(inputText)
-                response?.text?.let { outputContent ->
+                val responseText = prompt(inputText)
+                if (responseText != null) {
                     _covUiData.update {
                         it.dropLast(1)
                     }
@@ -83,7 +80,7 @@ class ConvoViewModel(
                             Conv(
                                 id = aiPreConv.id,
                                 owner = aiPreConv.owner,
-                                value = outputContent,
+                                value = responseText,
                                 state = UiState.Success
                             )
                         )
@@ -110,7 +107,7 @@ class ConvoViewModel(
     fun fetchATechQuote() {
         viewModelScope.launch {
             val techQuote = prompt(PROMPT_ACTIVITY.TECH_QUOTE.prompt)
-            _quote.value = techQuote(techQuote?.text?.cleanJson().orEmpty())
+            _quote.value = techQuote(techQuote?.cleanJson().orEmpty())
         }
     }
 
@@ -118,8 +115,8 @@ class ConvoViewModel(
         viewModelScope.launch {
             _riddle.update { it.copy(state = UiState.Loading) }
 
-            val riddleResponse = correctnessModel.generateContent(PROMPT_ACTIVITY.RIDDLE.prompt)
-            val response = riddleData(riddleResponse.text?.cleanJson().orEmpty())
+            val riddleResponse = prompt(PROMPT_ACTIVITY.RIDDLE.prompt)
+            val response = riddleData(riddleResponse?.cleanJson().orEmpty())
             _riddle.update {
                 it.copy(
                     data = response,
@@ -137,7 +134,7 @@ class ConvoViewModel(
         viewModelScope.launch {
             _mathChallenge.update { it.copy(state = UiState.Loading) }
             val promptResponse = prompt(PROMPT_ACTIVITY.MATH_CHALLENGE.prompt)
-            val data = mathChallengeData(promptResponse?.text?.cleanJson().orEmpty())
+            val data = mathChallengeData(promptResponse?.cleanJson().orEmpty())
 
             _mathChallenge.update {
                 it.copy(
@@ -157,7 +154,7 @@ class ConvoViewModel(
             Log.e("Test", "Loading")
             _news.update { it.copy(state = UiState.Loading) }
             val promptResponse = prompt(PROMPT_ACTIVITY.TECH_AND_SCIENCE_NEWS.prompt)
-            val response = newsData(promptResponse?.text?.cleanJson().orEmpty())
+            val response = newsData(promptResponse?.cleanJson().orEmpty())
 
             if (response != null) {
                 _news.update { it.copy(value = response, state = UiState.Success) }
@@ -175,8 +172,8 @@ class ConvoViewModel(
             val promptResponse = prompt(PROMPT_ACTIVITY.SUMMARIZE_ARTICLE.prompt.plus(url))
             _summary.update {
                 it.copy(
-                    value = promptResponse?.text,
-                    state = if (promptResponse?.text?.isNotBlank() == true) UiState.Success else UiState.Error
+                    value = promptResponse,
+                    state = if (promptResponse?.isNotBlank() == true) UiState.Success else UiState.Error
                 )
 
             }
@@ -184,9 +181,9 @@ class ConvoViewModel(
         }
     }
 
-    private suspend fun prompt(input: String): GenerateContentResponse? {
+    private suspend fun prompt(input: String): String? {
         return try {
-            proModel.generateContent(input)
+            koogHelper.generate(input)
         } catch (e: Exception) {
             Log.e("Error", e.localizedMessage.orEmpty())
             null
